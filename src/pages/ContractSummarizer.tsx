@@ -5,9 +5,9 @@ import { useShallow } from 'zustand/shallow';
 const ContractSummarizer: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  const [loading, getDocumentAnalysis, parsedResponse, error] = useStore(
-    useShallow((state) => [state.responseLoading, state.getDocumentAnalysis, state.documentAnalysis, state.error])
-  )
+  const [loading, getDocumentAnalysis, parsedResponse] = useStore(
+    useShallow((state) => [state.responseLoading, state.getDocumentAnalysis, state.documentAnalysis])
+  );
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
@@ -26,8 +26,8 @@ const ContractSummarizer: React.FC = () => {
             width="300"
             height="300"
             className="border-none mb-5"
-            title="Loading Animation">
-          </iframe>
+            title="Loading Animation"
+          ></iframe>
           <p className="text-primary text-lg">Hang tight, Analyzing...</p>
         </div>
       ) : (
@@ -41,7 +41,8 @@ const ContractSummarizer: React.FC = () => {
                 width="300"
                 height="300"
                 className="border-none mb-5"
-                title="Contract Animation" />
+                title="Contract Animation"
+              />
               <label className="custom-file-upload bg-primary text-secondary py-2 px-4 rounded cursor-pointer inline-block mt-5">
                 <input
                   type="file"
@@ -55,93 +56,142 @@ const ContractSummarizer: React.FC = () => {
             </>
           )}
 
-          {parsedResponse && !loading && (
-            <div className="flex flex-col gap-4 mt-5 w-full">
-              <div className="bg-primary p-4 rounded-lg shadow-lg">
-                <h2 className="text-white font-semibold">Document Summary</h2>
-                <p className="text-white"><strong>Document Name:</strong> {parsedResponse.document_name ?? 'N/A'}</p>
-                <p className="text-white"><strong>Document Type:</strong> {parsedResponse.document_type ?? 'N/A'}</p>
+            {parsedResponse && !loading && (
+              <div className="w-full max-w-4xl mx-auto space-y-6 mt-20">
 
-                <div className="flex justify-between gap-4 mt-4">
-                  <div className="bg-black p-4 rounded-lg shadow-md flex-1">
-                    <h3 className="text-white font-semibold">Effective Date</h3>
-                    <p className="text-white">{parsedResponse.effective_date ?? 'N/A'}</p>
-                  </div>
-                  <div className="bg-black p-4 rounded-lg shadow-md flex-1">
-                    <h3 className="text-white font-semibold">Termination Date</h3>
-                    <p className="text-white">{parsedResponse.termination_date ?? 'N/A'}</p>
-                  </div>
+                {/* Document Info */}
+                <div className="bg-darkbg shadow-md rounded-lg p-6">
+                  <h2 className="text-2xl font-semibold text-bg">Document Information</h2>
+                  <p className="text-bg text-start">Name: {parsedResponse.document_name}</p>
+                  <p className="text-bg text-start">Type: {parsedResponse.document_type}</p>
+                  <p className="text-bg text-start">Parties Involved: {parsedResponse.parties_involved?.join(", ")}</p>
+                  <p className="text-bg text-start">Effective Date: {parsedResponse.effective_date}</p>
+                  <p className="text-bg text-start">Termination Date: {parsedResponse.termination_date}</p>
                 </div>
 
-                <p className="text-white"><strong>Parties Involved:</strong> {parsedResponse.parties_involved?.length ? parsedResponse.parties_involved.join(', ') : 'N/A'}</p>
-              </div>
+                {/* Key Terms */}
+                {parsedResponse.key_terms && (
+                  <div className="bg-secondary shadow-md rounded-lg p-6">
+                    <h2 className="text-2xl font-semibold text-primary">Key Terms</h2>
+                    <p className="text-darkbg">{parsedResponse.key_terms.description}</p>
+                    {parsedResponse.key_terms.terms?.map((term, index) => (
+                      <div key={index} className="bg-bg rounded p-4 my-2">
+                        <p className="text-darkbg text-start font-bold">Term: {term.term}</p>
+                        <p className="text-darkbg text-start">Importance: {term.importance}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-              <div className="bg-tertiary p-4 rounded-lg shadow-lg w-full">
-                <h2 className="text-xl font-semibold">Key Terms</h2>
-                <p className="text-gray-800"><strong>Description:</strong> {parsedResponse.key_terms?.description ?? 'N/A'}</p>
-                <h4 className="text-lg font-semibold">Terms:</h4>
-                <ul className="list-disc list-inside">
-                  {parsedResponse.key_terms?.terms?.length ? (
-                    parsedResponse.key_terms.terms.map((term, index) => (
-                      <li key={index}>
-                        <strong>{term.term ?? 'N/A'}:</strong> {term.importance ?? 'N/A'}
-                      </li>
-                    ))
-                  ) : (
-                    <li>N/A</li>
-                  )}
-                </ul>
-              </div>
+                {/* Obligations */}
+                {parsedResponse.obligations && (
+                  <div className="bg-secondary shadow-md rounded-lg p-6">
+                    <h2 className="text-2xl font-semibold text-primary">Obligations</h2>
+                    {parsedResponse.obligations.map((obligation, index) => (
+                      <div key={index} className="bg-bg rounded p-4 my-2">
+                        <p className="text-darkbg text-start font-bold">Obligation: {obligation.obligation}</p>
+                        <p className="text-darkbg text-start">Description: {obligation.description}</p>
+                        <p className="text-darkbg text-start">Due Date: {obligation.due_date}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-              <div className="bg-red-200 p-4 rounded-lg shadow-lg">
-                <h2 className="text-xl font-semibold">Risks</h2>
-                {parsedResponse.risks?.general?.length ? (
-                  parsedResponse.risks.general.map((risk, index) => (
-                    <div key={index} className="mb-2">
-                      <p><strong>Risk:</strong> {risk.risk ?? 'N/A'}</p>
-                      <p><strong>Impact:</strong> {risk.impact ?? 'N/A'}</p>
-                      <p><strong>Likelihood:</strong> {risk.likelihood ?? 'N/A'}</p>
-                      <p><strong>Concerning:</strong> {risk.concerning ? 'Yes' : 'No'}</p>
-                    </div>
-                  ))
-                ) : (
-                  <p>N/A</p>
+                {/* Risks */}
+                {parsedResponse.risks && (
+                  <div className="bg-red-300 shadow-md rounded-lg p-6">
+                    <h2 className="text-2xl font-semibold text-primary">Risks</h2>
+                    {Object.entries(parsedResponse.risks).map(([riskType, risks], index) => (
+                      <div key={index} className="mt-4">
+                        <h3 className="text-xl font-semibold text-darkbg capitalize">{riskType} Risks</h3>
+                        {risks?.map((risk, i) => (
+                          <div key={i} className="bg-bg rounded p-4 my-2">
+                            <p className="text-darkbg  text-start font-bold">Risk: {risk.risk}</p>
+                            <p className="text-darkbg text-start ">Impact: {risk.impact}</p>
+                            <p className="text-darkbg text-start ">Likelihood: {risk.likelihood}</p>
+                            <p className="text-darkbg text-start ">Concerning: {risk.concerning ? "Yes" : "No"}</p>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Shady Clauses */}
+                {parsedResponse.shady_clauses && (
+                  <div className="bg-secondary shadow-md rounded-lg p-6">
+                    <h2 className="text-2xl font-semibold text-primary">Shady Clauses</h2>
+                    {parsedResponse.shady_clauses.map((clause, index) => (
+                      <div key={index} className="bg-bg rounded p-4 my-2">
+                        <p className="text-darkbg text-start">Clause: {clause.clause}</p>
+                        <p className="text-darkbg text-start">Description: {clause.description}</p>
+                        <p className="text-darkbg text-start">Reason: {clause.reason}</p>
+                        <p className="text-darkbg text-start">Potential Impact: {clause.potential_impact}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Action Items */}
+                {parsedResponse.action_items && (
+                  <div className="bg-secondary shadow-md rounded-lg p-6">
+                    <h2 className="text-2xl font-semibold text-primary">Action Items</h2>
+                    {parsedResponse.action_items.map((action, index) => (
+                      <div key={index} className="bg-bg rounded p-4 my-2">
+                        <p className="text-darkbg text-start font-bold">Action: {action.action}</p>
+                        <p className="text-darkbg text-start">Deadline: {action.deadline? action.deadline : "N/A"}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Dispute Resolution */}
+                {parsedResponse.dispute_resolution && (
+                  <div className="bg-secondary shadow-md rounded-lg p-6">
+                    <h2 className="text-2xl font-semibold text-primary text-start">Dispute Resolution</h2>
+                    <p className="text-darkbg text-start">Method: {parsedResponse.dispute_resolution.method}</p>
+                    <p className="text-darkbg text-start">Jurisdiction: {parsedResponse.dispute_resolution.jurisdiction}</p>
+                  </div>
+                )}
+
+                {/* Termination Conditions */}
+                {parsedResponse.termination_conditions && (
+                  <div className="bg-secondary shadow-md rounded-lg p-6">
+                    <h2 className="text-2xl font-semibold text-primary text-start">Termination Conditions</h2>
+                    <ul className="list-disc list-inside text-darkbg text-start">
+                      {parsedResponse.termination_conditions.map((condition, index) => (
+                        <li key={index}>{condition}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Review Recommendations */}
+                {parsedResponse.review_recommendations && (
+                  <div className="bg-secondary shadow-md rounded-lg p-6">
+                    <h2 className="text-2xl font-semibold text-primary text-start">Review Recommendations</h2>
+                    <p className="text-darkbg text-start">{parsedResponse.review_recommendations}</p>
+                  </div>
+                )}
+
+                {/* User Protection Tips */}
+                {parsedResponse.user_protection_tips && (
+                  <div className="bg-secondary shadow-md rounded-lg p-6">
+                    <h2 className="text-2xl font-semibold text-primary text-start">User Protection Tips</h2>
+                    <p className="text-darkbg text-start">{parsedResponse.user_protection_tips}</p>
+                  </div>
+                )}
+
+                {/* Overall Analysis */}
+                {parsedResponse.overall_analysis && (
+                  <div className="bg-secondary shadow-md rounded-lg p-6 text-start">
+                    <h2 className="text-2xl font-semibold text-primary">Overall Analysis</h2>
+                    <p className="text-darkbg">{parsedResponse.overall_analysis}</p>
+                  </div>
                 )}
               </div>
+            )}
 
-              <div className="bg-tertiary p-4 rounded-lg shadow-lg">
-                <h2 className="text-xl font-semibold">Obligations</h2>
-                {parsedResponse.obligations?.length ? (
-                  parsedResponse.obligations.map((obligation, index) => (
-                    <div key={index} className="mb-2">
-                      <p><strong>Obligation:</strong> {obligation.obligation ?? 'N/A'}</p>
-                      <p><strong>Description:</strong> {obligation.description ?? 'N/A'}</p>
-                      <p><strong>Due Date:</strong> {obligation.due_date ?? 'N/A'}</p>
-                    </div>
-                  ))
-                ) : (
-                  <p>N/A</p>
-                )}
-              </div>
-
-              <div className="bg-tertiary p-4 rounded-lg shadow-lg">
-                <h2 className="text-xl font-semibold">Dispute Resolution</h2>
-                <p><strong>Method:</strong> {parsedResponse.dispute_resolution?.method ?? 'N/A'}</p>
-                <p><strong>Jurisdiction:</strong> {parsedResponse.dispute_resolution?.jurisdiction ?? 'N/A'}</p>
-              </div>
-
-              <div className="flex justify-between gap-4">
-                <div className="bg-tertiary p-4 rounded-lg shadow-lg flex-1">
-                  <h2 className="text-xl font-semibold">Review Recommendations</h2>
-                  <p>{parsedResponse.review_recommendations ?? 'N/A'}</p>
-                </div>
-                <div className="bg-tertiary p-4 rounded-lg shadow-lg flex-1">
-                  <h2 className="text-xl font-semibold">User Protection Tips</h2>
-                  <p>{parsedResponse.user_protection_tips ?? 'N/A'}</p>
-                </div>
-              </div>
-            </div>
-          )}
         </>
       )}
     </div>
