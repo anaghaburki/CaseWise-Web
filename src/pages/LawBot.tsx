@@ -26,12 +26,13 @@ export default function LawBot() {
     await getChatResponse({ ai: false, message: inputMessage.trim(), time: new Date().toLocaleTimeString().slice(0, -3) });
   };
   
+  const { innerHeight: height } = window
 
   return (
     <div className=" flex flex-row items-center min-h-screen bg-bg justify-between">
       <div className='flex-col bg-tertiary w-1/2 min-h-screen flex justify-center items-center'>
         <h1 className='text-bg text-6xl font-extralight text-center'>CaseWise <br></br> LawBot!</h1>
-        <div className='flex flex-col m-5 gap-2'>
+        <div className='flex flex-col m-5 gap-2 '>
           {lawBotFeatures.map((item)=>
             <div className='p-5 rounded-3xl bg-bg'>
               <h1 className='text-primary font-bold text-xl'>
@@ -45,7 +46,7 @@ export default function LawBot() {
         </div>
       </div>
       <div className='w-1/2 bg-bg flex-col min-h-screen flex justify-between p-2'>
-        <div className="flex-col px-2 overflow-y-scroll">
+        <div className="flex-col px-2 overflow-y-scroll" style={{maxHeight: height * 0.85}}>
           {messageList.map((chatItem: ChatItem, index: React.Key | null | undefined) => (
             <ChatCard key={index} chatItem={chatItem} />
           ))}
