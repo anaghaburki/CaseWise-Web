@@ -6,6 +6,10 @@ interface ChatCardProps {
 }
 
 const ChatCard = ({ chatItem }: ChatCardProps) => {
+  const textStyle = {
+    color: chatItem.ai ? 'white' : 'black',
+  };
+
   return (
     <div
       className="justify-between flex-row flex-wrap items-end gap-1 rounded-3xl my-1 px-5 py-3"
@@ -18,15 +22,12 @@ const ChatCard = ({ chatItem }: ChatCardProps) => {
     >
       <Markdown
         components={{
-          p: ({ node, ...props }) => (
-            <p
-              {...props}
-              style={{
-                color: chatItem.ai ? 'white' : 'black',
-                fontWeight: '600',
-              }}
-            />
-          ),
+          p: ({ node, ...props }) => <p {...props} style={textStyle} />,
+          h1: ({ node, ...props }) => <h1 {...props} style={textStyle} />,
+          h2: ({ node, ...props }) => <h2 {...props} style={textStyle} />,
+          h3: ({ node, ...props }) => <h3 {...props} style={textStyle} />,
+          h4: ({ node, ...props }) => <h3 {...props} style={textStyle} />,
+          li: ({ node, ...props }) => <li {...props} style={textStyle} />,
         }}
       >
         {chatItem.message}
