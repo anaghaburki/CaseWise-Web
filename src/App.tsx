@@ -1,11 +1,15 @@
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import ContractSummarizer from './pages/ContractSummarizer';
-import Chatbot from './pages/ContractSummarizer';
+import LawBot from './pages/LawBot';
 
 const App = () => {
   return (
-    <div>
-      <ContractSummarizer />
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<ContractSummarizer />} />
+        <Route path="/lawbot" element = {<LawBot/>} />
+      </Routes>
+    </BrowserRouter>
   );
 };
 
