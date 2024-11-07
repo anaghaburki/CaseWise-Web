@@ -1,47 +1,42 @@
-import { memo } from 'react';
-import Markdown from 'react-markdown';
+import Markdown from 'react-markdown'
 
-interface ChatCardProps {
-  chatItem: ChatItem;
+interface ChatItem {
+  ai: boolean
+  message: string
+  time: string
 }
 
-const ChatCard = ({ chatItem }: ChatCardProps) => {
-  const textStyle = {
-    color: chatItem.ai ? 'white' : 'black',
-  };
+interface ChatCardProps {
+  chatItem: ChatItem
+}
+
+function ChatCard({ chatItem }: ChatCardProps) {
+  const { ai, message, time } = chatItem
 
   return (
-    <div
-      className="justify-between flex-row flex-wrap items-end gap-1 rounded-3xl my-1 px-5 py-3"
-      style={{
-        backgroundColor: chatItem.ai ? '#507680' : '#EBD9CD',
-        marginRight: chatItem.ai ? 40 : 0,
-        marginLeft: chatItem.ai ? 0 : 40,
-        alignSelf: chatItem.ai ? 'flex-start' : 'flex-end',
+    <div className={`flex ${ai ? 'justify-start' : 'justify-end'} mb-4`} >
+  <div
+    className={`max-w-[80%] sm:max-w-[70%] md:max-w-[60%] rounded-3xl px-4 py-3 ${ai ? 'bg-[#507680] text-white' : 'bg-[#EBD9CD] text-black'
+      }`}
+  >
+    <Markdown
+      components={{
+        p: ({ node, ...props }) => <p className="mb-2" {...props} />,
+        h1: ({ node, ...props }) => <h1 className="text-2xl font-bold mb-2" {...props} />,
+        h2: ({ node, ...props }) => <h2 className="text-xl font-bold mb-2" {...props} />,
+        h3: ({ node, ...props }) => <h3 className="text-lg font-bold mb-2" {...props} />,
+        h4: ({ node, ...props }) => <h4 className="text-base font-bold mb-2" {...props} />,
+        li: ({ node, ...props }) => <li className="ml-4" {...props} />,
       }}
     >
-      <Markdown
-        components={{
-          p: ({ node, ...props }) => <p {...props} style={textStyle} />,
-          h1: ({ node, ...props }) => <h1 {...props} style={textStyle} />,
-          h2: ({ node, ...props }) => <h2 {...props} style={textStyle} />,
-          h3: ({ node, ...props }) => <h3 {...props} style={textStyle} />,
-          h4: ({ node, ...props }) => <h3 {...props} style={textStyle} />,
-          li: ({ node, ...props }) => <li {...props} style={textStyle} />,
-        }}
-      >
-        {chatItem.message}
-      </Markdown>
-      <p
-        className="text-xs"
-        style={{
-          color: chatItem.ai ? 'white' : 'black',
-        }}
-      >
-        {chatItem.time}
-      </p>
+      {message}
+    </Markdown>
+    <div className="text-xs mt-2 text-right">
+      {time}
     </div>
-  );
-};
+  </div>
+    </div >
+  )
+}
 
-export default memo(ChatCard);
+export default ChatCard
