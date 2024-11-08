@@ -1,7 +1,7 @@
 import { Content, GoogleGenerativeAI } from "@google/generative-ai";
 import { create } from "zustand";
 import { arrayBufferToBase64 } from "../utils/helperfunctions";
-import { documentPrompt } from "../utils/prompts";
+import { documentPrompt, initialPrompt } from "../utils/prompts";
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_API_KEY);
 
@@ -14,6 +14,7 @@ type state = {
 type actions = {
   getChatResponse: (chatItem: ChatItem) => Promise<void>;
   getDocumentAnalysis: (file: File) => Promise<void>;
+  loadInitialPrompt: () => Promise<void>
 };
 
 type loaders = {
@@ -57,6 +58,10 @@ const useStore = create<state & actions & loaders>((set, get) => ({
           },
         ],
       });
+
+      set({
+        contextHistory: history
+      })
     } catch (error) {
       alert("Unknown Lawbot Error");
     } finally {
@@ -66,6 +71,7 @@ const useStore = create<state & actions & loaders>((set, get) => ({
 
   getDocumentAnalysis: async (file: File) => {
     set({ responseLoading: true });
+    const history = get().contextHistory
     try {
       const model = genAI.getGenerativeModel({
         model: "gemini-1.5-flash",
@@ -74,7 +80,9 @@ const useStore = create<state & actions & loaders>((set, get) => ({
         },
       });
 
-      const chat = model.startChat({});
+      const chat = model.startChat({
+        history: history
+      });
       const reader = new FileReader();
 
       reader.onloadend = async () => {
@@ -95,12 +103,43 @@ const useStore = create<state & actions & loaders>((set, get) => ({
       };
 
       reader.readAsArrayBuffer(file);
+
+      set({
+        contextHistory: history
+      })
     } catch (error) {
       console.error(error);
     } finally {
       set({ responseLoading: false });
     }
   },
+
+  loadInitialPrompt: async() => {
+    try {
+      set({ responseLoading: true });
+
+      const history = get().contextHistory;
+      const model = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash",
+        generationConfig: {
+          responseMimeType: "text/plain",
+        },
+      });
+
+      const chat = model.startChat({
+        history: history,
+      });
+
+      await chat.sendMessage(initialPrompt);
+      set({
+        contextHistory: history
+      })
+    } catch (error) {
+      alert("Unknown Lawbot Error");
+    } finally {
+      set({ responseLoading: false });
+    }
+  }
 }));
 
 export default useStore;

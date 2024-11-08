@@ -1,12 +1,24 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import ContractSummarizer from './pages/ContractSummarizer';
 import LawBot from './pages/LawBot';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavItem } from './components/NavItems';
+import useStore from './store/useStore';
+import { useShallow } from 'zustand/shallow';
+import { initialPrompt } from './utils/prompts';
 
 const App = () => {
+
+  const [loadInitialPrompt] = useStore(
+    useShallow((state)=>[state.loadInitialPrompt])
+  )
   const [activeItem, setActiveItem] = useState('Home');
   const screens = ["Home", "Summarizer", "Predictor", "Research", "Glossary", "Lawbot"];
+
+
+  useEffect(()=>{
+    loadInitialPrompt()
+  },[])
 
   return (
     <BrowserRouter>
