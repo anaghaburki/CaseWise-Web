@@ -14,7 +14,7 @@ type state = {
 type actions = {
   getChatResponse: (chatItem: ChatItem) => Promise<void>;
   getDocumentAnalysis: (file: File) => Promise<void>;
-  loadInitialPrompt: () => Promise<void>
+  loadInitialPrompt: () => Promise<void>;
 };
 
 type loaders = {
@@ -60,8 +60,8 @@ const useStore = create<state & actions & loaders>((set, get) => ({
       });
 
       set({
-        contextHistory: history
-      })
+        contextHistory: history,
+      });
     } catch (error) {
       alert("Unknown Lawbot Error");
     } finally {
@@ -70,9 +70,10 @@ const useStore = create<state & actions & loaders>((set, get) => ({
   },
 
   getDocumentAnalysis: async (file: File) => {
-    set({ responseLoading: true });
-    const history = get().contextHistory
     try {
+      set({ responseLoading: true });
+
+      const history = get().contextHistory;
       const model = genAI.getGenerativeModel({
         model: "gemini-1.5-flash",
         generationConfig: {
@@ -81,7 +82,7 @@ const useStore = create<state & actions & loaders>((set, get) => ({
       });
 
       const chat = model.startChat({
-        history: history
+        history: history,
       });
       const reader = new FileReader();
 
@@ -99,22 +100,22 @@ const useStore = create<state & actions & loaders>((set, get) => ({
           const result = await chat.sendMessage([documentPrompt, pdf]);
           const jsonResponse = JSON.parse(result.response.text());
           set({ documentAnalysis: jsonResponse });
+          set({ responseLoading: false });
         }, 3000);
       };
 
       reader.readAsArrayBuffer(file);
 
       set({
-        contextHistory: history
-      })
+        contextHistory: history,
+      });
     } catch (error) {
       console.error(error);
-    } finally {
       set({ responseLoading: false });
     }
   },
 
-  loadInitialPrompt: async() => {
+  loadInitialPrompt: async () => {
     try {
       set({ responseLoading: true });
 
@@ -132,14 +133,14 @@ const useStore = create<state & actions & loaders>((set, get) => ({
 
       await chat.sendMessage(initialPrompt);
       set({
-        contextHistory: history
-      })
+        contextHistory: history,
+      });
     } catch (error) {
       alert("Unknown Lawbot Error");
     } finally {
       set({ responseLoading: false });
     }
-  }
+  },
 }));
 
 export default useStore;
