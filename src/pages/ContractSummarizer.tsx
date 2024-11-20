@@ -65,10 +65,10 @@ const ContractSummarizer: React.FC = () => {
     ) :
       documentAnalysis ? (
         <div>
-          <div className='flex flex-1 items-center justify-evenly bg-bg flex-col gap-3 h-screen max-h-screen pt-20 pb-10'>
+          <div className='flex flex-1 items-center justify-evenly bg-bg flex-col gap-3 h-screen max-h-screen pt-20 pb-20'>
             {documentAnalysis.document_name || documentAnalysis.document_type ?
-              <div className='p-5 rounded-xl bg-darkbg justify-center items-center self-center flex flex-row gap-5 h-[330px]'>
-                <div>
+              <div className='p-1 rounded-xl bg-darkbg justify-center items-center self-center flex flex-row gap-5 '>
+                <div className="p-4">
                   <Player
                     autoplay
                     loop
@@ -78,7 +78,7 @@ const ContractSummarizer: React.FC = () => {
                   {documentAnalysis.document_name ? <h1 className='text-bg font-bold text-xl text-center mt-3'>{documentAnalysis.document_name}</h1> : null}
                   {documentAnalysis.document_type ? <h1 className='text-bg text-center'>{documentAnalysis.document_name}</h1> : null}
                 </div>
-                <div className="border-l-2 border-bg h-[280px]"></div>
+                <div className="border-l-2 border-bg flex h-5/6"></div>
                 <div className='flex flex-col gap-5 mr-3'>
                   <h1 className='text-bg font-bold text-lg'>
                     Effective Date: <h1 className='font-normal text-base'>{documentAnalysis.effective_date ? documentAnalysis.effective_date : "Not Specified"}</h1>
@@ -88,7 +88,7 @@ const ContractSummarizer: React.FC = () => {
                   </h1>
                 </div>
                 {documentAnalysis.parties_involved ?
-                  <div className='rounded-lg p-5 bg-secondary flex flex-col flex-1 h-[310px] -m-3 gap-5 justify-center overflow-y-scroll no-scrollbar'>
+                  <div className='rounded-lg p-4 bg-secondary flex flex-col h-full gap-5 justify-center overflow-y-scroll no-scrollbar'>
                     <div className='flex flex-row items-center justify-between'>
                       <h1 className='text-primary font-bold text-xl text-center mt-3'>Parties Involved</h1>
                       <Player

@@ -34,7 +34,7 @@ const useStore = create<state & actions & loaders>((set, get) => ({
 
       const history = get().contextHistory;
       const model = genAI.getGenerativeModel({
-        model: "gemini-1.5-flash",
+        model: "gemini-1.5-flash-002",
         generationConfig: {
           responseMimeType: "text/plain",
         },
@@ -63,7 +63,7 @@ const useStore = create<state & actions & loaders>((set, get) => ({
         contextHistory: history,
       });
     } catch (error) {
-      alert("Unknown Lawbot Error");
+      alert(error);
     } finally {
       set({ responseLoading: false });
     }
@@ -75,7 +75,7 @@ const useStore = create<state & actions & loaders>((set, get) => ({
 
       const history = get().contextHistory;
       const model = genAI.getGenerativeModel({
-        model: "gemini-1.5-flash",
+        model: "gemini-1.5-flash-002",
         generationConfig: {
           responseMimeType: "application/json",
         },
@@ -121,7 +121,7 @@ const useStore = create<state & actions & loaders>((set, get) => ({
 
       const history = get().contextHistory;
       const model = genAI.getGenerativeModel({
-        model: "gemini-1.5-flash",
+        model: "gemini-1.5-flash-002",
         generationConfig: {
           responseMimeType: "text/plain",
         },
@@ -136,7 +136,7 @@ const useStore = create<state & actions & loaders>((set, get) => ({
         contextHistory: history,
       });
     } catch (error) {
-      alert("Unknown Lawbot Error");
+      alert(error);
     } finally {
       set({ responseLoading: false });
     }
