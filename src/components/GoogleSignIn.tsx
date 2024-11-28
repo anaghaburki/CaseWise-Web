@@ -2,7 +2,6 @@ import React from "react";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../firebaseConfig";
 
-
 interface GoogleSignInProps {
   onSignIn: (userInfo: any) => void;
 }
@@ -14,7 +13,7 @@ const GoogleSignIn: React.FC<GoogleSignInProps> = ({ onSignIn }) => {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       console.log("User signed in:", user);
-      onSignIn(user); 
+      onSignIn(user);
     } catch (error) {
       console.error("Error signing in with Google:", error);
     }

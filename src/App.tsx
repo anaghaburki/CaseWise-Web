@@ -6,6 +6,7 @@ import { NavItem } from "./components/NavItems";
 import useStore from "./store/useStore";
 import { useShallow } from "zustand/shallow";
 import GoogleSignIn from "./components/GoogleSignIn";
+import Account from "./components/Account"; 
 import { initialPrompt } from "./utils/prompts";
 
 const App = () => {
@@ -16,46 +17,54 @@ const App = () => {
   const [activeItem, setActiveItem] = useState("Home");
   const [user, setUser] = useState(null); 
   const screens = [
-    "Home",
-    "Summarizer",
-    "Predictor",
-    "Research",
-    "Glossary",
-    "Lawbot",
+    { name: "Home", path: "/Summarizer" },
+    { name: "Summarizer", path: "/Summarizer" },
+    { name: "Predictor", path: "/Predictor" },
+    { name: "Research", path: "/Research" },
+    { name: "Glossary", path: "/Glossary" },
+    { name: "Lawbot", path: "/Lawbot" },
+    { name: "Account", path: "/Account" }, 
   ];
 
-  
   useEffect(() => {
     loadInitialPrompt();
   }, []);
 
-  
   const handleSignIn = (userInfo: any) => {
-    setUser(userInfo); 
+    setUser(userInfo);
+  };
+
+  const handleLogout = () => {
+    setUser(null); 
   };
 
   return (
     <BrowserRouter>
       {!user ? (
-        
         <GoogleSignIn onSignIn={handleSignIn} />
       ) : (
-        
         <>
+          
           <div className="flex self-center left-1/2 -translate-x-1/2 flex-row rounded-full gap-2 p-1 top-4 absolute bg-darkbg">
             {screens.map((item) => (
               <NavItem
-                key={item}
-                label={item}
-                isActive={activeItem === item}
-                onClick={() => setActiveItem(item)}
+                key={item.name}
+                label={item.name}
+                isActive={activeItem === item.name}
+                onClick={() => setActiveItem(item.name)}
               />
             ))}
           </div>
+
+          
           <Routes>
-            <Route path="/" element={<Navigate to="/Summarizer" />} />
+            <Route path="/" element={<Navigate to="/Summarizer" replace />} />
             <Route path="/Summarizer" element={<ContractSummarizer />} />
             <Route path="/Lawbot" element={<LawBot />} />
+            <Route
+              path="/Account"
+              element={<Account onLogout={handleLogout} />}
+            />
           </Routes>
         </>
       )}
