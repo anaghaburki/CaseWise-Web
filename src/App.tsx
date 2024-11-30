@@ -10,6 +10,7 @@ import Account from "./components/Account";
 import { initialPrompt } from "./utils/prompts";
 import { onAuthStateChanged, signOut, User } from "firebase/auth"; 
 import { auth } from "./firebaseConfig";
+import CasePredictor from "./pages/CasePredictor";
 
 const App = () => {
   const [loadInitialPrompt] = useStore(
@@ -84,6 +85,7 @@ const App = () => {
               path="/Account"
               element={<Account onLogout={handleLogout} />}
             />
+            <Route path="/Predictor" element={<CasePredictor />} />
           </Routes>
         </>
       )}
