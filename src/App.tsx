@@ -6,8 +6,10 @@ import { NavItem } from "./components/NavItems";
 import useStore from "./store/useStore";
 import { useShallow } from "zustand/shallow";
 import GoogleSignIn from "./components/GoogleSignIn";
-import Account from "./components/Account"; 
+import Account from "./components/Account";
 import { initialPrompt } from "./utils/prompts";
+import { onAuthStateChanged, signOut, User } from "firebase/auth"; 
+import { auth } from "./firebaseConfig";
 
 const App = () => {
   const [loadInitialPrompt] = useStore(
@@ -15,7 +17,8 @@ const App = () => {
   );
 
   const [activeItem, setActiveItem] = useState("Home");
-  const [user, setUser] = useState(null); 
+  const [user, setUser] = useState<User | null>(null); 
+
   const screens = [
     { name: "Home", path: "/Summarizer" },
     { name: "Summarizer", path: "/Summarizer" },
@@ -23,19 +26,37 @@ const App = () => {
     { name: "Research", path: "/Research" },
     { name: "Glossary", path: "/Glossary" },
     { name: "Lawbot", path: "/Lawbot" },
-    { name: "Account", path: "/Account" }, 
+    { name: "Account", path: "/Account" },
   ];
 
   useEffect(() => {
     loadInitialPrompt();
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("User is signed in:", user);
+        setUser(user); 
+      } else {
+        console.log("No user is signed in");
+        setUser(null); 
+      }
+    });
+
+    return () => unsubscribe(); 
   }, []);
 
-  const handleSignIn = (userInfo: any) => {
+  const handleSignIn = (userInfo: User) => {
     setUser(userInfo);
   };
 
-  const handleLogout = () => {
-    setUser(null); 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth); 
+      setUser(null); 
+      console.log("User logged out");
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
   };
 
   return (
@@ -44,7 +65,6 @@ const App = () => {
         <GoogleSignIn onSignIn={handleSignIn} />
       ) : (
         <>
-          
           <div className="flex self-center left-1/2 -translate-x-1/2 flex-row rounded-full gap-2 p-1 top-4 absolute bg-darkbg">
             {screens.map((item) => (
               <NavItem
@@ -56,7 +76,6 @@ const App = () => {
             ))}
           </div>
 
-          
           <Routes>
             <Route path="/" element={<Navigate to="/Summarizer" replace />} />
             <Route path="/Summarizer" element={<ContractSummarizer />} />

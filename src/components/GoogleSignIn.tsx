@@ -1,5 +1,5 @@
-import React from "react";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import React, { useEffect } from "react";
+import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebaseConfig";
 
 interface GoogleSignInProps {
@@ -7,6 +7,17 @@ interface GoogleSignInProps {
 }
 
 const GoogleSignIn: React.FC<GoogleSignInProps> = ({ onSignIn }) => {
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("User already signed in:", user);
+        onSignIn(user); 
+      }
+    });
+
+    return () => unsubscribe(); 
+  }, [onSignIn]);
+
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
     try {
