@@ -1,7 +1,7 @@
 import { Content, GoogleGenerativeAI } from "@google/generative-ai";
 import { create } from "zustand";
 import { arrayBufferToBase64 } from "../utils/helperfunctions";
-import { documentPrompt, initialPrompt } from "../utils/prompts";
+import { documentPrompt, initialPrompt, predictionPrompt } from "../utils/prompts";
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_API_KEY);
 
@@ -9,12 +9,14 @@ type state = {
   messageList: ChatItem[];
   contextHistory: Content[];
   documentAnalysis: DocumentAnalysis | null;
+  casePrediction: CasePrediction | null;
 };
 
 type actions = {
   getChatResponse: (chatItem: ChatItem) => Promise<void>;
   getDocumentAnalysis: (file: File) => Promise<void>;
   loadInitialPrompt: () => Promise<void>;
+  getCasePrediction: (file: File) => Promise<void>;
 };
 
 type loaders = {
@@ -25,6 +27,7 @@ const useStore = create<state & actions & loaders>((set, get) => ({
   messageList: [],
   contextHistory: [],
   documentAnalysis: null,
+  casePrediction: null, 
 
   responseLoading: false,
 
@@ -138,6 +141,52 @@ const useStore = create<state & actions & loaders>((set, get) => ({
     } catch (error) {
       alert(error);
     } finally {
+      set({ responseLoading: false });
+    }
+  },
+  getCasePrediction: async (file: File) => {
+    try {
+      set({ responseLoading: true });
+
+      const history = get().contextHistory;
+      const model = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash-002",
+        generationConfig: {
+          responseMimeType: "application/json",
+        },
+      });
+
+      const chat = model.startChat({
+        history: history,
+      });
+
+      const reader = new FileReader();
+
+      reader.onloadend = async () => {
+        const arrayBuffer = reader.result as ArrayBuffer;
+        const base64String = arrayBufferToBase64(arrayBuffer);
+        const pdf = {
+          inlineData: {
+            data: base64String,
+            mimeType: "application/pdf",
+          },
+        };
+
+        setTimeout(async () => {
+          const result = await chat.sendMessage([predictionPrompt, pdf]);
+          const jsonResponse = JSON.parse(result.response.text());
+          set({ casePrediction: jsonResponse }); 
+          set({ responseLoading: false });
+        }, 3000);
+      };
+
+      reader.readAsArrayBuffer(file);
+
+      set({
+        contextHistory: history,
+      });
+    } catch (error) {
+      console.error("Error getting case prediction:", error);
       set({ responseLoading: false });
     }
   },

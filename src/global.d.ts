@@ -82,3 +82,14 @@ declare global {
     };
   }
 }
+
+interface CasePrediction {
+  predictedOutcome: string | null;
+  predictionConfidence: 'Low' | 'Medium' | 'High' | null;
+  keyFactors: string[] | null;
+  improvementStrategies: string[] | null;
+  riskLevel: 'Low' | 'Medium' | 'High' | null;
+  potentialRewards: string | null;
+  uncertaintyFactors: string[] | null;
+  successRate: number | null;
+}

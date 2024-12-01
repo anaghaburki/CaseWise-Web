@@ -61,4 +61,26 @@ export const documentPrompt = `Analyze the following legal document and extract 
           \"overall_analysis\": \"\"
 }`;
 
+export const predictionPrompt = `Analyze the given case scenario and provide a detailed prediction with all relevant insights. Include factors influencing the prediction, potential improvement strategies, associated risks, potential rewards, estimated cost, timeline, and any uncertainties affecting the prediction
+
+Return the response in the following JSON response WITHOUT ANY PARSING OR SYNTAX ERRORS:
+
+        {
+          \"predictedOutcome\": \"\",
+          \"predictionConfidence\": "Low" | "Medium" | "High",
+          \"keyFactors\": [
+            \"\"
+          ],
+          \"improvementStrategies\": [
+            \"\"
+          ],
+          \"riskLevel\":  "Low" | "Medium" | "High",
+          \"potentialRewards\": \"\",
+          \"uncertaintyFactors\": [
+            \"\"
+          ],
+          \"successRate\": \"\"
+        }
+`;
+
 export const initialPrompt = `REMEMBER that your name is CaseWise LawBot and You are being used as a law bot which is supposed to answer law related questions, doubts etc. if the user asks anything else that isn't related, just reply with "I am Sorry, CaseWise LawBot is only limited to provide legal and law related help!"`
