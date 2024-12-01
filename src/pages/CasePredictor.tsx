@@ -1,60 +1,157 @@
-import React, { useState } from "react";
-import useStore from '../store/useStore';
+import React, { useState } from 'react';
+
+interface CasePrediction {
+  predictedOutcome: string | null;
+  predictionConfidence: 'Low' | 'Medium' | 'High' | null;
+  keyFactors: string[] | null;
+  improvementStrategies: string[] | null;
+  riskLevel: 'Low' | 'Medium' | 'High' | null;
+  potentialRewards: string | null;
+  uncertaintyFactors: string[] | null;
+  successRate: number | null;
+}
 
 const CasePredictor: React.FC = () => {
-  const { getCasePrediction, casePrediction, responseLoading } = useStore();
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [caseDetails, setCaseDetails] = useState<string>('');
+  const [prediction, setPrediction] = useState<CasePrediction | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files.length > 0) {
-      setSelectedFile(event.target.files[0]);
-    }
-  };
-
-  const handlePredict = async () => {
-    if (selectedFile) {
-      await getCasePrediction(selectedFile);
-    } else {
-      alert("Please select a file to predict.");
-    }
+  const handleAnalyze = async () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      const mockPrediction: CasePrediction = {
+        predictedOutcome: 'Favorable',
+        predictionConfidence: 'High',
+        keyFactors: ['Key witness testimony', 'Strong documentary evidence'],
+        improvementStrategies: ['Enhance cross-examination', 'Gather more supporting documents'],
+        riskLevel: 'Low',
+        potentialRewards: 'Significant financial compensation',
+        uncertaintyFactors: ['Witness credibility', 'Unexpected legal precedents'],
+        successRate: 85,
+      };
+      setPrediction(mockPrediction);
+      setIsLoading(false);
+    }, 2000);
   };
 
   return (
-    <div className="p-6 max-w-md mx-auto bg-white rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold mb-4 text-center">Case Predictor</h1>
+    <div className="min-h-screen bg-[#F4EEE4] flex flex-col items-center justify-center p-4 overflow-hidden pt-24 font-['ClashDisplay']">
+      <div className="w-full max-w-5xl bg-white shadow-2xl rounded-3xl p-8 space-y-6 transform transition-all duration-300 ease-in-out hover:scale-[1.01]">
+        <h1 className="text-4xl font-black text-[#452B01] mb-6 text-center tracking-tight">
+          Case Prediction AI
+        </h1>
 
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Upload a PDF file:
-        </label>
-        <input
-          type="file"
-          accept="application/pdf"
-          onChange={handleFileChange}
-          className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
-        />
-      </div>
-
-      <button
-        onClick={handlePredict}
-        disabled={responseLoading}
-        className={`w-full px-4 py-2 text-white font-semibold rounded-lg ${
-          responseLoading
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-blue-500 hover:bg-blue-600"
-        }`}
-      >
-        {responseLoading ? "Processing..." : "Get Prediction"}
-      </button>
-
-      {casePrediction && (
-        <div className="mt-6 bg-gray-100 p-4 rounded-lg">
-          <h2 className="text-lg font-semibold mb-2">Prediction Result:</h2>
-          <pre className="text-sm text-gray-700 overflow-auto">
-            {JSON.stringify(casePrediction, null, 2)}
-          </pre>
+        <div className="mb-6">
+          <textarea
+            className="w-full h-40 p-4 border-2 border-[#241C1A]/10 rounded-2xl bg-[#F4EEE4]/50 focus:outline-none focus:ring-4 focus:ring-[#507680]/50 transition-all duration-300 ease-in-out resize-none text-[#241C1A] text-base font-medium"
+            placeholder="Enter detailed case information here..."
+            value={caseDetails}
+            onChange={(e) => setCaseDetails(e.target.value)}
+          />
         </div>
-      )}
+
+        <button
+          className={`w-full px-6 py-3 font-bold rounded-2xl transition-all duration-300 ease-in-out text-lg
+            ${isLoading || !caseDetails.trim() 
+              ? 'bg-[#241C1A]/10 text-[#241C1A]/50 cursor-not-allowed' 
+              : 'bg-[#507680] text-white hover:bg-[#507680]/90 hover:shadow-lg transform hover:scale-[1.01]'}`}
+          onClick={handleAnalyze}
+          disabled={isLoading || !caseDetails.trim()}
+        >
+          {isLoading ? 'Analyzing...' : 'Predict Case Outcome'}
+        </button>
+
+        {isLoading && (
+          <div className="flex justify-center items-center mt-6">
+            <div className="animate-pulse w-16 h-16 bg-[#507680]/50 rounded-full"></div>
+          </div>
+        )}
+
+        {prediction && !isLoading && (
+          <div className="space-y-6 animate-fade-in">
+            <div className="grid md:grid-cols-3 gap-6">
+              {/* Overall Prediction Card */}
+              <div className="md:col-span-2 bg-[#F4EEE4] shadow-lg rounded-2xl p-6 border border-[#241C1A]/10">
+                <h2 className="text-2xl font-bold text-[#452B01] mb-4 border-b border-[#241C1A]/20 pb-2">
+                  Prediction Overview
+                </h2>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-3">
+                    <div>
+                      <p className="font-semibold text-[#241C1A]">Predicted Outcome</p>
+                      <p className="text-green-700 font-bold text-xl">{prediction.predictedOutcome}</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-[#241C1A]">Confidence Level</p>
+                      <p className="text-[#507680] font-bold text-xl">{prediction.predictionConfidence}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="font-semibold text-[#241C1A]">Risk Level</p>
+                      <p className="text-red-700 font-bold text-xl">{prediction.riskLevel}</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-[#241C1A]">Success Rate</p>
+                      <p className="text-[#507680] font-bold text-xl">{prediction.successRate}%</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Other Cards */}
+              <div className="bg-[#F4EEE4] shadow-lg rounded-2xl p-6 border border-[#241C1A]/10">
+                <h3 className="text-xl font-bold text-[#452B01] mb-4 border-b border-[#241C1A]/20 pb-2">
+                  Potential Rewards
+                </h3>
+                <p className="text-green-800 font-bold text-lg">{prediction.potentialRewards}</p>
+              </div>
+
+              <div className="bg-[#F4EEE4] shadow-lg rounded-2xl p-6 border border-[#241C1A]/10">
+                <h3 className="text-xl font-bold text-[#452B01] mb-4 border-b border-[#241C1A]/20 pb-2">
+                  Key Factors
+                </h3>
+                <ul className="space-y-2">
+                  {prediction.keyFactors?.map((factor, index) => (
+                    <li key={index} className="flex items-center text-[#241C1A]">
+                      <span className="mr-3 text-[#507680] font-bold">•</span>
+                      <span className="font-medium">{factor}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="bg-[#F4EEE4] shadow-lg rounded-2xl p-6 border border-[#241C1A]/10">
+                <h3 className="text-xl font-bold text-[#452B01] mb-4 border-b border-[#241C1A]/20 pb-2">
+                  Improvement Strategies
+                </h3>
+                <ul className="space-y-2">
+                  {prediction.improvementStrategies?.map((strategy, index) => (
+                    <li key={index} className="flex items-center text-[#241C1A]">
+                      <span className="mr-3 text-green-600 font-bold">•</span>
+                      <span className="font-medium">{strategy}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="bg-[#F4EEE4] shadow-lg rounded-2xl p-6 border border-[#241C1A]/10">
+                <h3 className="text-xl font-bold text-[#452B01] mb-4 border-b border-[#241C1A]/20 pb-2">
+                  Uncertainty Factors
+                </h3>
+                <ul className="space-y-2">
+                  {prediction.uncertaintyFactors?.map((factor, index) => (
+                    <li key={index} className="flex items-center text-[#241C1A]">
+                      <span className="mr-3 text-red-600 font-bold">•</span>
+                      <span className="font-medium">{factor}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
