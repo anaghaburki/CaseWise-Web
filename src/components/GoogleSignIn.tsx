@@ -44,7 +44,7 @@ const GoogleSignIn: React.FC<GoogleSignInProps> = ({ onSignIn }) => {
           <Player
             autoplay
             loop
-            src="https://lottie.host/03bac291-faa7-484f-8d23-16689604aa3d/UxSrfd80K6.lottie"
+            src="https://lottie.host/240dabcd-1889-48fe-82a9-428d32a95672/LafD75I5Cg.json"
             style={{ height: "200px", width: "200px" }}
           />
         </div>
