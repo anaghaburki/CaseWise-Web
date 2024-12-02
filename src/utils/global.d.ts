@@ -1,0 +1,160 @@
+interface ChatItem {
+  ai: boolean;
+  message: string;
+  time: string;
+}
+
+interface RiskEntry {
+  risk: string | null;
+  impact: string | null;
+  likelihood: string | null;
+  concerning: boolean;
+}
+
+interface KeyTerms {
+  description: string | null;
+  terms:
+    | {
+        term: string | null;
+        importance: string | null;
+      }[]
+    | null;
+}
+
+interface Obligation {
+  obligation: string | null;
+  description: string | null;
+  due_date: string | null;
+}
+
+interface ShadyClause {
+  clause: string | null;
+  description: string | null;
+  reason: string | null;
+  potential_impact: string | null;
+}
+
+interface ActionItem {
+  action: string | null;
+  deadline: string | null;
+}
+
+interface DisputeResolution {
+  method: string | null;
+  jurisdiction: string | null;
+}
+
+interface DocumentAnalysis {
+  document_name: string | null;
+  document_type: string | null;
+  parties_involved: (string | null)[] | null;
+  effective_date: string | null;
+  termination_date: string | null;
+  key_terms: KeyTerms | null;
+  obligations: Obligation[] | null;
+  risks: {
+    general: RiskEntry[] | null;
+    legal: RiskEntry[] | null;
+    financial: RiskEntry[] | null;
+    reputational: RiskEntry[] | null;
+  } | null;
+  shady_clauses: ShadyClause[] | null;
+  action_items: ActionItem[] | null;
+  dispute_resolution: DisputeResolution | null;
+  termination_conditions: (string | null)[] | null;
+  review_recommendations: string | null;
+  user_protection_tips: string | null;
+  overall_analysis: string | null;
+}
+
+export {};
+
+declare global {
+  interface Window {
+    google: {
+      accounts: {
+        id: {
+          initialize: (config: { client_id: string; callback: (response: any) => void }) => void;
+          renderButton: (container: HTMLElement | null, options: { theme: string; size: string }) => void;
+          prompt: () => void;
+        };
+      };
+    };
+  }
+}
+
+interface CasePrediction {
+  predictedOutcome: string | null;
+  predictionConfidence: 'Low' | 'Medium' | 'High' | null;
+  keyFactors: string[] | null;
+  improvementStrategies: string[] | null;
+  riskLevel: 'Low' | 'Medium' | 'High' | null;
+  potentialRewards: string | null;
+  uncertaintyFactors: string[] | null;
+  successRate: number | null;
+}
+
+interface CaseFiling {
+  caseTitle: string;
+  clientDetails: {
+    name: string;
+    contact: string;
+    email: string;
+    address?: string;
+  };
+  caseType: "Civil" | "Criminal" | "Corporate" | "Family" | "Other";
+  filingDate: string; 
+  jurisdiction: string;
+  documentsRequired: string[];
+  status: "Draft" | "Submitted" | "Rejected";
+}
+interface EvidenceCollection {
+  evidenceId: string;
+  evidenceType: "Physical" | "Digital" | "Witness Statement" | "Other";
+  description: string;
+  uploadedBy: string;
+  uploadDate: string;
+  fileUrl?: string;
+  verificationStatus: "Pending" | "Verified" | "Rejected";
+}
+interface LegalResearch {
+  researchId: string;
+  topic: string;
+  notes: string;
+  relatedLaws: string[];
+  precedentCases: {
+    caseTitle: string;
+    caseSummary: string;
+    rulingDate: string;
+    court: string;
+  }[];
+  completionStatus: "In Progress" | "Completed";
+}
+interface HearingManagement {
+  hearingId: string;
+  hearingDate: string;
+  courtName: string;
+  judgeName: string;
+  agenda: string;
+  outcome?: string;
+  documentsRequired: string[];
+  rescheduleDetails?: {
+    rescheduledDate: string;
+    reason: string;
+  };
+}
+interface CaseResolution {
+  resolutionId: string;
+  resolutionDate: string;
+  outcome: "Won" | "Lost" | "Settled" | "Withdrawn";
+  summary: string;
+  judgmentCopyUrl?: string; 
+  followUpActions: string[];
+}
+interface CaseData {
+  caseFiling: CaseFiling;
+  evidenceCollection: EvidenceCollection[] | null;
+  legalResearch: LegalResearch[] | null;
+  hearingManagement: HearingManagement[] | null;
+  caseResolution?: CaseResolution | null;
+}
