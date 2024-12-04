@@ -1,8 +1,19 @@
 import { Content, GoogleGenerativeAI } from "@google/generative-ai";
 import { create } from "zustand";
 import { arrayBufferToBase64 } from "../utils/helperfunctions";
-import { documentPrompt, initialPrompt, predictionPrompt, newCasePrompt } from "../utils/prompts";
-import { CaseData, CaseFiling, CasePrediction, ChatItem, DocumentAnalysis } from "@/global";
+import {
+  documentPrompt,
+  initialPrompt,
+  predictionPrompt,
+  newCasePrompt,
+} from "../utils/prompts";
+import {
+  CaseData,
+  CaseFiling,
+  CasePrediction,
+  ChatItem,
+  DocumentAnalysis,
+} from "@/global";
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_API_KEY);
 
@@ -12,16 +23,16 @@ type state = {
   documentAnalysis: DocumentAnalysis | null;
   documentSummaryLines: string[] | null;
   casePrediction: CasePrediction | null;
-  caseList: CaseData[]; 
-  currentCase: CaseData | null; 
+  caseList: CaseData[];
+  currentCase: CaseData | null;
 };
 
 type actions = {
   getChatResponse: (chatItem: ChatItem) => Promise<void>;
   getDocumentAnalysis: (file: File) => Promise<void>;
   loadInitialPrompt: () => Promise<void>;
-  getCasePrediction: (file: File) => Promise<void>;
-  initNewCase: (title: string, description: string) => Promise<void>; 
+  getCasePrediction: (file?: File | null, inputText?: string) => Promise<void>;
+  initNewCase: (title: string, description: string) => Promise<void>;
 };
 
 type loaders = {
@@ -34,11 +45,10 @@ const useStore = create<state & actions & loaders>((set, get) => ({
   documentAnalysis: null,
   documentSummaryLines: null,
   casePrediction: null,
-  caseList: [], 
-  currentCase: null, 
+  caseList: [],
+  currentCase: null,
   responseLoading: false,
 
-  
   getChatResponse: async (chatItem: ChatItem) => {
     try {
       set({ responseLoading: true });
@@ -154,7 +164,10 @@ const useStore = create<state & actions & loaders>((set, get) => ({
     }
   },
 
-  getCasePrediction: async (file: File) => {
+  getCasePrediction: async (
+    file: File | null = null,
+    inputText: string = ""
+  ) => {
     try {
       set({ responseLoading: true });
 
@@ -162,7 +175,8 @@ const useStore = create<state & actions & loaders>((set, get) => ({
       const model = genAI.getGenerativeModel({
         model: "gemini-1.5-flash-002",
         generationConfig: {
-          responseMimeType: "application/json",
+          responseMimeType:
+            "application/json",
         },
       });
 
@@ -170,27 +184,32 @@ const useStore = create<state & actions & loaders>((set, get) => ({
         history: history,
       });
 
-      const reader = new FileReader();
+      if (file) {
+        const reader = new FileReader();
 
-      reader.onloadend = async () => {
-        const arrayBuffer = reader.result as ArrayBuffer;
-        const base64String = arrayBufferToBase64(arrayBuffer);
-        const pdf = {
-          inlineData: {
-            data: base64String,
-            mimeType: "application/pdf",
-          },
-        };
+        reader.onloadend = async () => {
+          const arrayBuffer = reader.result as ArrayBuffer;
+          const base64String = arrayBufferToBase64(arrayBuffer);
+          const pdf = {
+            inlineData: {
+              data: base64String,
+              mimeType: "application/pdf",
+            },
+          };
 
-        setTimeout(async () => {
           const result = await chat.sendMessage([predictionPrompt, pdf]);
           const jsonResponse = JSON.parse(result.response.text());
-          set({ casePrediction: jsonResponse });
-          set({ responseLoading: false });
-        }, 3000);
-      };
+          set({ casePrediction: jsonResponse, responseLoading: false });
+        };
 
-      reader.readAsArrayBuffer(file);
+        reader.readAsArrayBuffer(file);
+      } else if (inputText !== "") {
+        const result = await chat.sendMessage([predictionPrompt, inputText]);
+        const jsonResponse = JSON.parse(result.response.text()) as CasePrediction;
+        set({ casePrediction: jsonResponse, responseLoading: false });
+      } else {
+        throw new Error("Both file and inputText are missing");
+      }
 
       set({
         contextHistory: history,

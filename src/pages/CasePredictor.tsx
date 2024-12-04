@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import useStore from '../store/useStore';
+import { useShallow } from 'zustand/shallow';
 
 interface CasePrediction {
   predictedOutcome: string | null;
@@ -13,26 +15,25 @@ interface CasePrediction {
 
 const CasePredictor: React.FC = () => {
   const [caseDetails, setCaseDetails] = useState<string>('');
-  const [prediction, setPrediction] = useState<CasePrediction | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
-  const handleAnalyze = async () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      const mockPrediction: CasePrediction = {
-        predictedOutcome: 'Favorable',
-        predictionConfidence: 'High',
-        keyFactors: ['Key witness testimony', 'Strong documentary evidence'],
-        improvementStrategies: ['Enhance cross-examination', 'Gather more supporting documents'],
-        riskLevel: 'Low',
-        potentialRewards: 'Significant financial compensation',
-        uncertaintyFactors: ['Witness credibility', 'Unexpected legal precedents'],
-        successRate: 85,
-      };
-      setPrediction(mockPrediction);
-      setIsLoading(false);
-    }, 2000);
-  };
+  const [prediction, getCasePrediction, isLoading] = useStore(
+    useShallow((state)=>[state.casePrediction, state.getCasePrediction, state.responseLoading])
+  )
+
+  const handleDescAnalyze = async () => {
+    if(caseDetails){
+      await getCasePrediction(null,caseDetails)
+    }
+  }
+
+  const handlePredict = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] || null;
+    if (file) {
+      setSelectedFile(file);
+      await getCasePrediction(file, "");
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#F4EEE4] flex flex-col items-center justify-center p-4 overflow-hidden pt-24 font-['ClashDisplay']">
@@ -50,16 +51,31 @@ const CasePredictor: React.FC = () => {
           />
         </div>
 
-        <button
-          className={`w-full px-6 py-3 font-bold rounded-2xl transition-all duration-300 ease-in-out text-lg
-            ${isLoading || !caseDetails.trim() 
-              ? 'bg-[#241C1A]/10 text-[#241C1A]/50 cursor-not-allowed' 
-              : 'bg-[#507680] text-white hover:bg-[#507680]/90 hover:shadow-lg transform hover:scale-[1.01]'}`}
-          onClick={handleAnalyze}
-          disabled={isLoading || !caseDetails.trim()}
-        >
-          {isLoading ? 'Analyzing...' : 'Predict Case Outcome'}
-        </button>
+        <div className='flex-row flex items-center space-x-3'>
+          <button
+            className={`w-full px-6 py-3 font-bold rounded-2xl transition-all duration-300 ease-in-out text-lg
+            ${isLoading || !caseDetails.trim()
+                ? 'bg-[#241C1A]/10 text-[#241C1A]/50 cursor-not-allowed'
+                : 'bg-[#507680] text-white hover:bg-[#507680]/90 hover:shadow-lg transform hover:scale-[1.01]'}`}
+            onClick={handleDescAnalyze}
+            disabled={isLoading || !caseDetails.trim()}
+          >
+            {isLoading ? 'Analyzing...' : 'Predict Case Outcome'}
+          </button>
+          <label className={`w-full px-6 py-3 font-bold rounded-2xl transition-all duration-300 ease-in-out text-lg
+            ${isLoading || !caseDetails.trim()
+              ? 'bg-[#241C1A]/10 text-[#241C1A]/50 cursor-not-allowed'
+              : 'bg-[#507680] text-white hover:bg-[#507680]/90 hover:shadow-lg transform hover:scale-[1.01]'}`}>
+            <input
+              type="file"
+              accept="application/pdf"
+              onChange={handlePredict}
+              aria-label="Upload PDF file"
+              className="hidden"
+            />
+            Your Legal Documents go Here!
+          </label>
+        </div>
 
         {isLoading && (
           <div className="flex justify-center items-center mt-6">
@@ -112,7 +128,7 @@ const CasePredictor: React.FC = () => {
                   Key Factors
                 </h3>
                 <ul className="space-y-2">
-                  {prediction.keyFactors?.map((factor, index) => (
+                  {prediction.keyFactors?.map((factor:any, index:any) => (
                     <li key={index} className="flex items-center text-[#241C1A]">
                       <span className="mr-3 text-[#507680] font-bold">•</span>
                       <span className="font-medium">{factor}</span>
@@ -126,7 +142,7 @@ const CasePredictor: React.FC = () => {
                   Improvement Strategies
                 </h3>
                 <ul className="space-y-2">
-                  {prediction.improvementStrategies?.map((strategy, index) => (
+                  {prediction.improvementStrategies?.map((strategy: any, index: any) => (
                     <li key={index} className="flex items-center text-[#241C1A]">
                       <span className="mr-3 text-green-600 font-bold">•</span>
                       <span className="font-medium">{strategy}</span>
@@ -140,7 +156,7 @@ const CasePredictor: React.FC = () => {
                   Uncertainty Factors
                 </h3>
                 <ul className="space-y-2">
-                  {prediction.uncertaintyFactors?.map((factor, index) => (
+                  {prediction.uncertaintyFactors?.map((factor: any, index: any) => (
                     <li key={index} className="flex items-center text-[#241C1A]">
                       <span className="mr-3 text-red-600 font-bold">•</span>
                       <span className="font-medium">{factor}</span>
