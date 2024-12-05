@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { useShallow } from "zustand/shallow";
+import useStore from "../store/useStore";
 
-const CaseNavigator = ({ currentCase }) => {
+const CaseNavigator = () => {
+
+  const [currentCase] = useStore(
+    useShallow((state) => [state.currentCase])
+  )
+
   const [filingExpanded, setFilingExpanded] = useState(false);
   const [evidenceExpanded, setEvidenceExpanded] = useState(false);
 
