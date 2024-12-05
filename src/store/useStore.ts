@@ -241,10 +241,12 @@ const useStore = create<state & actions & loaders>((set, get) => ({
       const caseFiling: CaseFiling = JSON.parse(response.text()) as CaseFiling;
 
       const caseData: CaseData = {
+        navigateStatus: 0,
         caseFiling: caseFiling,
         evidenceCollection: null,
         legalResearch: null,
         hearingManagement: null,
+        caseResolution: null
       };
 
       set({

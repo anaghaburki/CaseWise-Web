@@ -13,6 +13,7 @@ import { auth } from "./firebaseConfig";
 import CasePredictor from "./pages/CasePredictor";
 import NewCase from "./components/NewCase";
 import CaseNavigator from "./pages/CaseNavigator";
+import Evidence from "./components/Evidence";
 
 const App = () => {
   const [loadInitialPrompt] = useStore(
@@ -26,7 +27,7 @@ const App = () => {
     { name: "Home", path: "/Summarizer" },
     { name: "Summarizer", path: "/Summarizer" },
     { name: "Predictor", path: "/Predictor" },
-    { name: "Navigator", path: "/Navigator" },
+    { name: "Navigator", path: "/NewCase" },
     { name: "Glossary", path: "/Glossary" },
     { name: "Lawbot", path: "/Lawbot" },
     { name: "Account", path: "/Account" },
@@ -88,8 +89,12 @@ const App = () => {
               element={<Account onLogout={handleLogout} />}
             />
             <Route path="/Predictor" element={<CasePredictor />} />
-            <Route path="/Navigator" element={<CaseNavigator />} />
+            <Route path="/Navigator" element={<NewCase />} />
             <Route path="/NewCase" element={<NewCase />} />
+            <Route path="/Evidence" element={<Evidence />} />
+            <Route path="/CaseNavigator" element={<CaseNavigator />} />
+
+
           
           </Routes>
         </>

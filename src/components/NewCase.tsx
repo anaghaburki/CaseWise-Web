@@ -12,7 +12,7 @@ const NewCase: React.FC = () => {
   const navigate = useNavigate();
 
   const handleInitNewCase = async () => {
-    if (!(title || description)) {
+    if (!(title && description)) {
       alert('Insufficient information: Kindly fill all the details given below');
       return;
     }
