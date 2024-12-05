@@ -3,14 +3,14 @@ import { useShallow } from "zustand/shallow";
 import useStore from "../store/useStore";
 
 const CaseNavigator = () => {
-
-  const [currentCase] = useStore(
-    useShallow((state) => [state.currentCase])
-  )
+  const [currentCase, updateCaseState] = useStore(
+    useShallow((state) => [state.currentCase, state.updateCaseState])
+  );
 
   const [filingExpanded, setFilingExpanded] = useState(false);
-  const [evidenceExpanded, setEvidenceExpanded] = useState(false);
-
+  const [navigateStatus, setNavigateStatus] = useState<number>(
+    currentCase?.navigateStatus || 0
+  );
   const [title, setTitle] = useState("");
   const [userName, setUserName] = useState("");
   const [contact, setContact] = useState("");
@@ -20,18 +20,14 @@ const CaseNavigator = () => {
   const [filingDate, setFilingDate] = useState("");
   const [jurisdiction, setJurisdiction] = useState("");
   const [caseStatus, setCaseStatus] = useState("Draft");
-  const [evidenceType, setEvidenceType] = useState("");
-  const [evidenceTitle, setEvidenceTitle] = useState("");
-  const [evidenceDescription, setEvidenceDescription] = useState("");
-  const [evidenceUploadDate, setEvidenceUploadDate] = useState("");
 
   const categoryList = ["Civil", "Criminal", "Corporate", "Family", "Other"];
   const caseStatusList = ["Draft", "Submitted", "Rejected"];
-  const evidenceTypeList = ["Physical", "Digital", "Witness Statement", "Other"];
 
   const handleAutofill = () => {
     if (currentCase && currentCase.caseFiling) {
-      const { caseTitle, clientDetails, caseType, filingDate, jurisdiction, status } = currentCase.caseFiling;
+      const { caseTitle, clientDetails, caseType, filingDate, jurisdiction, status } =
+        currentCase.caseFiling;
 
       setTitle(caseTitle || "");
       setUserName(clientDetails?.name || "");
@@ -53,9 +49,31 @@ const CaseNavigator = () => {
     }
   }, [filingExpanded]);
 
-  const handleUpdateCaseFiling = () => {
-    alert("Case Filing updated successfully!");
-    setFilingExpanded(false);
+  const handleSaveAndUpdateState = () => {
+    const updatedCase = {
+      ...currentCase,
+      caseFiling: {
+        caseTitle: title,
+        clientDetails: {
+          name: userName,
+          contact: contact,
+          email: email,
+          address: address,
+        },
+        caseType: caseCategory,
+        filingDate: filingDate,
+        jurisdiction: jurisdiction,
+        status: caseStatus,
+      },
+      navigateStatus,
+    };
+    updateCaseState(updatedCase);
+    alert("Case details updated successfully!");
+  };
+
+  const handleNextSection = () => {
+    setNavigateStatus((prev) => prev + 1);
+    alert("Navigating to the next section!");
   };
 
   return (
@@ -63,14 +81,35 @@ const CaseNavigator = () => {
       <h1>Case Navigator!</h1>
       <p>Your personalized case manager!</p>
 
-      <div style={{ backgroundColor: "#333", color: "#fff", padding: "20px", borderRadius: "10px", marginTop: "20px" }}>
+      <div
+        style={{
+          backgroundColor: "#333",
+          color: "#fff",
+          padding: "20px",
+          borderRadius: "10px",
+          marginTop: "20px",
+        }}
+      >
         <h2>Case Title: {title || "Untitled Case"}</h2>
       </div>
 
-      <div style={{ backgroundColor: "#ddd", padding: "20px", borderRadius: "10px", marginTop: "20px" }}>
+      <div
+        style={{
+          backgroundColor: "#ddd",
+          padding: "20px",
+          borderRadius: "10px",
+          marginTop: "20px",
+        }}
+      >
         <button
           onClick={() => setFilingExpanded(!filingExpanded)}
-          style={{ backgroundColor: "#007bff", color: "#fff", padding: "10px", border: "none", borderRadius: "5px" }}
+          style={{
+            backgroundColor: "#007bff",
+            color: "#fff",
+            padding: "10px",
+            border: "none",
+            borderRadius: "5px",
+          }}
         >
           Case Filing {filingExpanded ? "-" : "+"}
         </button>
@@ -83,7 +122,12 @@ const CaseNavigator = () => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter case title"
-              style={{ display: "block", width: "100%", padding: "10px", marginBottom: "10px" }}
+              style={{
+                display: "block",
+                width: "100%",
+                padding: "10px",
+                marginBottom: "10px",
+              }}
             />
 
             <label>Client Name</label>
@@ -92,7 +136,12 @@ const CaseNavigator = () => {
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
               placeholder="Enter client name"
-              style={{ display: "block", width: "100%", padding: "10px", marginBottom: "10px" }}
+              style={{
+                display: "block",
+                width: "100%",
+                padding: "10px",
+                marginBottom: "10px",
+              }}
             />
 
             <label>Contact</label>
@@ -101,7 +150,12 @@ const CaseNavigator = () => {
               value={contact}
               onChange={(e) => setContact(e.target.value)}
               placeholder="Enter contact number"
-              style={{ display: "block", width: "100%", padding: "10px", marginBottom: "10px" }}
+              style={{
+                display: "block",
+                width: "100%",
+                padding: "10px",
+                marginBottom: "10px",
+              }}
             />
 
             <label>Email</label>
@@ -110,7 +164,12 @@ const CaseNavigator = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter email"
-              style={{ display: "block", width: "100%", padding: "10px", marginBottom: "10px" }}
+              style={{
+                display: "block",
+                width: "100%",
+                padding: "10px",
+                marginBottom: "10px",
+              }}
             />
 
             <label>Address</label>
@@ -119,7 +178,12 @@ const CaseNavigator = () => {
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               placeholder="Enter address"
-              style={{ display: "block", width: "100%", padding: "10px", marginBottom: "10px" }}
+              style={{
+                display: "block",
+                width: "100%",
+                padding: "10px",
+                marginBottom: "10px",
+              }}
             />
 
             <label>Case Type</label>
@@ -145,7 +209,12 @@ const CaseNavigator = () => {
               type="date"
               value={filingDate}
               onChange={(e) => setFilingDate(e.target.value)}
-              style={{ display: "block", width: "100%", padding: "10px", marginBottom: "10px" }}
+              style={{
+                display: "block",
+                width: "100%",
+                padding: "10px",
+                marginBottom: "10px",
+              }}
             />
 
             <label>Jurisdiction</label>
@@ -154,7 +223,12 @@ const CaseNavigator = () => {
               value={jurisdiction}
               onChange={(e) => setJurisdiction(e.target.value)}
               placeholder="Enter jurisdiction"
-              style={{ display: "block", width: "100%", padding: "10px", marginBottom: "10px" }}
+              style={{
+                display: "block",
+                width: "100%",
+                padding: "10px",
+                marginBottom: "10px",
+              }}
             />
 
             <label>Case Status</label>
@@ -176,7 +250,7 @@ const CaseNavigator = () => {
             </div>
 
             <button
-              onClick={handleUpdateCaseFiling}
+              onClick={handleSaveAndUpdateState}
               style={{
                 marginTop: "20px",
                 padding: "10px 20px",
@@ -186,11 +260,25 @@ const CaseNavigator = () => {
                 borderRadius: "5px",
               }}
             >
-              Update Case Filing Details
+              Save & Update
             </button>
           </div>
         )}
       </div>
+
+      <button
+        onClick={handleNextSection}
+        style={{
+          marginTop: "20px",
+          padding: "10px 20px",
+          backgroundColor: "#17a2b8",
+          color: "#fff",
+          border: "none",
+          borderRadius: "5px",
+        }}
+      >
+        Next Section
+      </button>
     </div>
   );
 };

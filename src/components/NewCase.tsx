@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useStore from '../store/useStore';
 import { useShallow } from 'zustand/shallow';
@@ -6,10 +6,17 @@ import { useShallow } from 'zustand/shallow';
 const NewCase: React.FC = () => {
   const [title, setTitle] = useState<string>('');
   const [description, setDescription] = useState<string>('');
-  const [initNewCase, responseLoading] = useStore(
-    useShallow((state) => [state.initNewCase, state.responseLoading])
+  const [initNewCase, responseLoading, currentCase] = useStore(
+    useShallow((state) => [state.initNewCase, state.responseLoading, state.currentCase])
   );
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (currentCase) {
+      setTitle(currentCase.caseFiling?.title || '');
+      setDescription(currentCase.caseFiling?.description || '');
+    }
+  }, [currentCase]);
 
   const handleInitNewCase = async () => {
     if (!(title && description)) {

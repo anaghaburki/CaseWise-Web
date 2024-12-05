@@ -17,7 +17,7 @@ import {
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_API_KEY);
 
-type state = {
+type State = {
   messageList: ChatItem[];
   contextHistory: Content[];
   documentAnalysis: DocumentAnalysis | null;
@@ -27,19 +27,20 @@ type state = {
   currentCase: CaseData | null;
 };
 
-type actions = {
+type Actions = {
   getChatResponse: (chatItem: ChatItem) => Promise<void>;
   getDocumentAnalysis: (file: File) => Promise<void>;
   loadInitialPrompt: () => Promise<void>;
   getCasePrediction: (file?: File | null, inputText?: string) => Promise<void>;
   initNewCase: (title: string, description: string) => Promise<void>;
+  updateCaseState: (updatedFields: Partial<CaseData>) => void;
 };
 
-type loaders = {
+type Loaders = {
   responseLoading: boolean;
 };
 
-const useStore = create<state & actions & loaders>((set, get) => ({
+const useStore = create<State & Actions & Loaders>((set, get) => ({
   messageList: [],
   contextHistory: [],
   documentAnalysis: null,
@@ -49,90 +50,67 @@ const useStore = create<state & actions & loaders>((set, get) => ({
   currentCase: null,
   responseLoading: false,
 
-  getChatResponse: async (chatItem: ChatItem) => {
+  getChatResponse: async (chatItem) => {
     try {
       set({ responseLoading: true });
-
       const history = get().contextHistory;
+
       const model = genAI.getGenerativeModel({
         model: "gemini-1.5-flash-002",
-        generationConfig: {
-          responseMimeType: "text/plain",
-        },
+        generationConfig: { responseMimeType: "text/plain" },
       });
 
-      const chat = model.startChat({
-        history: history,
-      });
-
+      const chat = model.startChat({ history });
       const result = await chat.sendMessage(chatItem.message);
-      const response = result.response;
-      const text = response.text();
+      const response = await result.response.text();
 
       set({
         messageList: [
           ...get().messageList,
-          {
-            ai: true,
-            message: text,
-            time: new Date().toLocaleTimeString().slice(0, -3),
-          },
+          { ai: true, message: response, time: new Date().toLocaleTimeString() },
         ],
-      });
-
-      set({
         contextHistory: history,
       });
     } catch (error) {
-      alert(error);
+      console.error("Error getting chat response:", error);
     } finally {
       set({ responseLoading: false });
     }
   },
 
-  getDocumentAnalysis: async (file: File) => {
+  getDocumentAnalysis: async (file) => {
     try {
       set({ responseLoading: true });
-
       const history = get().contextHistory;
+
       const model = genAI.getGenerativeModel({
         model: "gemini-1.5-flash-002",
-        generationConfig: {
-          responseMimeType: "application/json",
-        },
+        generationConfig: { responseMimeType: "application/json" },
       });
 
-      const chat = model.startChat({
-        history: history,
-      });
-
+      const chat = model.startChat({ history });
       const reader = new FileReader();
 
       reader.onloadend = async () => {
-        const arrayBuffer = reader.result as ArrayBuffer;
-        const base64String = arrayBufferToBase64(arrayBuffer);
-        const pdf = {
-          inlineData: {
-            data: base64String,
-            mimeType: "application/pdf",
-          },
-        };
+        try {
+          const base64String = arrayBufferToBase64(reader.result as ArrayBuffer);
+          const pdf = {
+            inlineData: { data: base64String, mimeType: "application/pdf" },
+          };
 
-        setTimeout(async () => {
           const result = await chat.sendMessage([documentPrompt, pdf]);
-          const jsonResponse = JSON.parse(result.response.text());
-          set({ documentAnalysis: jsonResponse });
+          const analysis = JSON.parse(await result.response.text());
+          set({ documentAnalysis: analysis });
+        } catch (error) {
+          console.error("Error parsing document analysis:", error);
+        } finally {
           set({ responseLoading: false });
-        }, 3000);
+        }
       };
 
       reader.readAsArrayBuffer(file);
-
-      set({
-        contextHistory: history,
-      });
     } catch (error) {
-      console.error(error);
+      console.error("Error analyzing document:", error);
       set({ responseLoading: false });
     }
   },
@@ -140,125 +118,112 @@ const useStore = create<state & actions & loaders>((set, get) => ({
   loadInitialPrompt: async () => {
     try {
       set({ responseLoading: true });
-
       const history = get().contextHistory;
+
       const model = genAI.getGenerativeModel({
         model: "gemini-1.5-flash-002",
-        generationConfig: {
-          responseMimeType: "text/plain",
-        },
+        generationConfig: { responseMimeType: "text/plain" },
       });
 
-      const chat = model.startChat({
-        history: history,
-      });
-
+      const chat = model.startChat({ history });
       await chat.sendMessage(initialPrompt);
-      set({
-        contextHistory: history,
-      });
+      set({ contextHistory: history });
     } catch (error) {
-      alert(error);
+      console.error("Error loading initial prompt:", error);
     } finally {
       set({ responseLoading: false });
     }
   },
 
-  getCasePrediction: async (
-    file: File | null = null,
-    inputText: string = ""
-  ) => {
+  getCasePrediction: async (file = null, inputText = "") => {
     try {
       set({ responseLoading: true });
-
       const history = get().contextHistory;
+
       const model = genAI.getGenerativeModel({
         model: "gemini-1.5-flash-002",
-        generationConfig: {
-          responseMimeType:
-            "application/json",
-        },
+        generationConfig: { responseMimeType: "application/json" },
       });
 
-      const chat = model.startChat({
-        history: history,
-      });
+      const chat = model.startChat({ history });
 
       if (file) {
         const reader = new FileReader();
-
         reader.onloadend = async () => {
-          const arrayBuffer = reader.result as ArrayBuffer;
-          const base64String = arrayBufferToBase64(arrayBuffer);
-          const pdf = {
-            inlineData: {
-              data: base64String,
-              mimeType: "application/pdf",
-            },
-          };
+          try {
+            const base64String = arrayBufferToBase64(reader.result as ArrayBuffer);
+            const pdf = {
+              inlineData: { data: base64String, mimeType: "application/pdf" },
+            };
 
-          const result = await chat.sendMessage([predictionPrompt, pdf]);
-          const jsonResponse = JSON.parse(result.response.text());
-          set({ casePrediction: jsonResponse, responseLoading: false });
+            const result = await chat.sendMessage([predictionPrompt, pdf]);
+            const prediction = JSON.parse(await result.response.text());
+            set({ casePrediction: prediction });
+          } catch (error) {
+            console.error("Error parsing case prediction:", error);
+          } finally {
+            set({ responseLoading: false });
+          }
         };
 
         reader.readAsArrayBuffer(file);
-      } else if (inputText !== "") {
+      } else if (inputText) {
         const result = await chat.sendMessage([predictionPrompt, inputText]);
-        const jsonResponse = JSON.parse(result.response.text()) as CasePrediction;
-        set({ casePrediction: jsonResponse, responseLoading: false });
+        const prediction = JSON.parse(await result.response.text());
+        set({ casePrediction: prediction });
       } else {
         throw new Error("Both file and inputText are missing");
       }
 
-      set({
-        contextHistory: history,
-      });
+      set({ contextHistory: history });
     } catch (error) {
       console.error("Error getting case prediction:", error);
       set({ responseLoading: false });
     }
   },
 
-  initNewCase: async (title: string, description: string) => {
+  initNewCase: async (title, description) => {
     try {
       set({ responseLoading: true });
-
       const history = get().contextHistory;
+
       const model = genAI.getGenerativeModel({
         model: "gemini-1.5-flash-002",
-        generationConfig: {
-          responseMimeType: "application/json",
-        },
+        generationConfig: { responseMimeType: "application/json" },
       });
 
-      const chat = model.startChat({
-        history: history,
-      });
-
+      const chat = model.startChat({ history });
       const result = await chat.sendMessage(newCasePrompt(title, description));
-      const response = result.response;
-      const caseFiling: CaseFiling = JSON.parse(response.text()) as CaseFiling;
+      const caseFiling: CaseFiling = JSON.parse(await result.response.text());
 
-      const caseData: CaseData = {
+      const newCase: CaseData = {
         navigateStatus: 0,
-        caseFiling: caseFiling,
+        caseFiling,
         evidenceCollection: null,
         legalResearch: null,
         hearingManagement: null,
-        caseResolution: null
+        caseResolution: null,
       };
 
       set({
-        caseList: [...get().caseList, caseData],
-        currentCase: caseData,
+        caseList: [...get().caseList, newCase],
+        currentCase: newCase,
         contextHistory: history,
       });
     } catch (error) {
-      alert("Error Initiating a new case: " + error?.toString());
+      console.error("Error initiating a new case:", error);
     } finally {
       set({ responseLoading: false });
     }
+  },
+
+  updateCaseState: (updatedFields) => {
+    set((state) => ({
+      currentCase: {
+        ...state.currentCase,
+        ...updatedFields,
+      },
+    }));
   },
 }));
 
