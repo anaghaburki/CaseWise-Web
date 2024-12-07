@@ -6,6 +6,8 @@ import {
   initialPrompt,
   predictionPrompt,
   newCasePrompt,
+  getHearingAdvicePrompt,
+  getResearchFindingsPrompt,
 } from "../utils/prompts";
 import {
   CaseData,
@@ -34,6 +36,8 @@ type Actions = {
   getCasePrediction: (file?: File | null, inputText?: string) => Promise<void>;
   initNewCase: (title: string, description: string) => Promise<void>;
   updateCaseState: (updatedFields: Partial<CaseData>) => void;
+  getLegalResearch: (caseData: CaseData) => Promise<void>;
+  getHearingAdvice: (caseData: CaseData) => Promise<string>
 };
 
 type Loaders = {
@@ -224,6 +228,51 @@ const useStore = create<State & Actions & Loaders>((set, get) => ({
         ...updatedFields,
       },
     }));
+  },
+
+  
+  getLegalResearch: async (caseData: CaseData) => {
+    try {
+      set({ responseLoading: true });
+      const history = get().contextHistory;
+
+      const model = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash-002",
+        generationConfig: { responseMimeType: "application/json" },
+      });
+
+      const chat = model.startChat({ history });
+      const result = await chat.sendMessage(getResearchFindingsPrompt(caseData));
+      const researchFindings = JSON.parse(await result.response.text());
+      
+    } catch (error) {
+      console.error("Error getting legal research:", error);
+    } finally {
+      set({ responseLoading: false });
+    }
+  },
+
+  getHearingAdvice: async (caseData: CaseData) => {
+    try {
+      set({ responseLoading: true });
+      const history = get().contextHistory;
+
+      const model = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash-002",
+        generationConfig: { responseMimeType: "text/plain" },
+      });
+
+      const chat = model.startChat({ history });
+      const result = await chat.sendMessage(getHearingAdvicePrompt(caseData));
+      const advice = await result.response.text();
+
+      return advice; 
+    } catch (error) {
+      console.error("Error getting hearing advice:", error);
+      return ""; 
+    } finally {
+      set({ responseLoading: false });
+    }
   },
 }));
 

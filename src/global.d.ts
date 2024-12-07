@@ -116,17 +116,14 @@ interface EvidenceCollection {
 }
   
 interface LegalResearch {
-  researchId: string;
   topic: string;
   notes: string;
-  relatedLaws: string[];
   precedentCases: {
     caseTitle: string;
     caseSummary: string;
     rulingDate: string;
     court: string;
-  }[];
-  completionStatus: "In Progress" | "Completed";
+  };
 }
 interface HearingManagement {
   hearingId: string;
@@ -142,18 +139,15 @@ interface HearingManagement {
   };
 }
 interface CaseResolution {
-  resolutionId: string;
   resolutionDate: string;
   outcome: "Won" | "Lost" | "Settled" | "Withdrawn";
-  summary: string;
-  judgmentCopyUrl?: string; 
-  followUpActions: string[];
+  notes: string;
 }
 interface CaseData {
-  navigateStatus: number,
-  caseFiling: CaseFiling;
+  navigateStatus: number?,
+  caseFiling: CaseFiling ;
   evidenceCollection?: EvidenceCollection[] | null;
   legalResearch?: LegalResearch[] | null;
   hearingManagement?: HearingManagement[] | null;
-  caseResolution?: CaseResolution | null;
+  caseResolution: CaseResolution | null;
 }

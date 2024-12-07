@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useShallow } from "zustand/shallow";
 import useStore from "../store/useStore";
 
 const CaseNavigator = () => {
+  const navigate = useNavigate();
   const [currentCase, updateCaseState] = useStore(
     useShallow((state) => [state.currentCase, state.updateCaseState])
   );
@@ -11,23 +13,19 @@ const CaseNavigator = () => {
   const [navigateStatus, setNavigateStatus] = useState<number>(
     currentCase?.navigateStatus || 0
   );
-  const [title, setTitle] = useState("");
-  const [userName, setUserName] = useState("");
-  const [contact, setContact] = useState("");
-  const [email, setEmail] = useState("");
-  const [address, setAddress] = useState("");
-  const [caseCategory, setCaseCategory] = useState("");
-  const [filingDate, setFilingDate] = useState("");
-  const [jurisdiction, setJurisdiction] = useState("");
-  const [caseStatus, setCaseStatus] = useState("Draft");
-  const [evidenceType, setEvidenceType] = useState<string>("");
-  const [evidenceTitle, setEvidenceTitle] = useState<string>("");
-  const [evidenceDescription, setEvidenceDescription] = useState<string>("");
-  const [evidenceUploadDate, setEvidenceUploadDate] = useState<string>("");
+
+  const [title, setTitle] = useState<string>("");
+  const [userName, setUserName] = useState<string>("");
+  const [contact, setContact] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [address, setAddress] = useState<string>("");
+  const [caseCategory, setCaseCategory] = useState<string>("");
+  const [filingDate, setFilingDate] = useState<string>("");
+  const [jurisdiction, setJurisdiction] = useState<string>("");
+  const [caseStatus, setCaseStatus] = useState<string>("Draft");
 
   const categoryList = ["Civil", "Criminal", "Corporate", "Family", "Other"];
   const caseStatusList = ["Draft", "Submitted", "Rejected"];
-  const evidenceTypeList = ["Physical","Digital","Witness Statement", "Other"]
 
   const handleAutofill = () => {
     if (currentCase && currentCase.caseFiling) {
@@ -78,7 +76,7 @@ const CaseNavigator = () => {
 
   const handleNextSection = () => {
     setNavigateStatus((prev) => prev + 1);
-    alert("Navigating to the next section!");
+    navigate("/Evidence"); 
   };
 
   return (
@@ -177,20 +175,6 @@ const CaseNavigator = () => {
               }}
             />
 
-            <label>Address</label>
-            <input
-              type="text"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="Enter address"
-              style={{
-                display: "block",
-                width: "100%",
-                padding: "10px",
-                marginBottom: "10px",
-              }}
-            />
-
             <label>Case Type</label>
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
               {categoryList.map((item) => (
@@ -202,51 +186,6 @@ const CaseNavigator = () => {
                     borderRadius: "5px",
                     backgroundColor: caseCategory === item ? "#007bff" : "#f0f0f0",
                     color: caseCategory === item ? "#fff" : "#333",
-                  }}
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-
-            <label>Filing Date</label>
-            <input
-              type="date"
-              value={filingDate}
-              onChange={(e) => setFilingDate(e.target.value)}
-              style={{
-                display: "block",
-                width: "100%",
-                padding: "10px",
-                marginBottom: "10px",
-              }}
-            />
-
-            <label>Jurisdiction</label>
-            <input
-              type="text"
-              value={jurisdiction}
-              onChange={(e) => setJurisdiction(e.target.value)}
-              placeholder="Enter jurisdiction"
-              style={{
-                display: "block",
-                width: "100%",
-                padding: "10px",
-                marginBottom: "10px",
-              }}
-            />
-
-            <label>Case Status</label>
-            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-              {caseStatusList.map((item) => (
-                <button
-                  key={item}
-                  onClick={() => setCaseStatus(item)}
-                  style={{
-                    padding: "10px",
-                    borderRadius: "5px",
-                    backgroundColor: caseStatus === item ? "#007bff" : "#f0f0f0",
-                    color: caseStatus === item ? "#fff" : "#333",
                   }}
                 >
                   {item}

@@ -14,6 +14,8 @@ import CasePredictor from "./pages/CasePredictor";
 import NewCase from "./components/NewCase";
 import CaseNavigator from "./pages/CaseNavigator";
 import Evidence from "./components/Evidence";
+import Hearing from "./components/Hearing";
+import Research from "./components/Research";
 
 const App = () => {
   const [loadInitialPrompt] = useStore(
@@ -93,6 +95,8 @@ const App = () => {
             <Route path="/NewCase" element={<NewCase />} />
             <Route path="/Evidence" element={<Evidence />} />
             <Route path="/CaseNavigator" element={<CaseNavigator />} />
+            <Route path="/Hearing" element={<Hearing />} />
+            <Route path="/Research" element={<Research />} />
 
 
           

@@ -1,3 +1,5 @@
+import { CaseData, DocumentAnalysis } from "@/global";
+
 export const documentPrompt = `Analyze the following legal document and extract all key information that a user should know, including terms, obligations, conditions, and potential risks. Highlight any clauses or terms that could be unfavorable, hidden, or misleading, and flag them as 'concerning' or 'shady' if applicable. Summarize the key takeaways clearly and list any specific actions the user should take
         
         Return the response the following JSON response WITHOUT ANY PARSING OR SYNTAX ERRORS 
@@ -106,6 +108,46 @@ export const newCasePrompt = (caseTitle: string, caseDesc: string): string => {
   `;
 };
 
+export const getResearchFindingsPrompt = (caseData: CaseData): string => {
+  return `
+    Based on the provided Case Information and evidences
 
+    Case Information: ${JSON.stringify(caseData.caseFiling)}
+    Evidences: ${caseData.evidenceCollection}
+
+    Find and return research findings
+
+    Provide the output in JSON format, returning an array of these finds adhering to the following interface
+
+    [
+      {
+        \"topic\": \"\",
+        \"notes\": \"\",
+        \"precedentCase\": {
+          \"caseTitle\": \"\",
+          \"caseSummary\": \"\",
+          \"rulingDate\": \"\",
+          \"court\": \"\"
+        }
+      }
+    ]
+  `;
+};
+
+export const getHearingAdvicePrompt = (caseData: CaseData): string => {
+  return `
+    LIMIT TO 100 WORDS
+
+    Remember you are being used in an app, just give information even if its inaccurate and do not include sentenses that say you cannot do it
+
+    Based on the provided Case Information and past hearings
+
+    Case Information: ${JSON.stringify(caseData.caseFiling)}
+    Evidences: ${caseData.evidenceCollection}
+    Past Hearings: ${caseData.hearingManagement}
+
+    Give an the most suitable advice to proceed further and guarentee best possible result
+  `;
+};
 
 export const initialPrompt = `REMEMBER that your name is CaseWise LawBot and You are being used as a law bot which is supposed to answer law related questions, doubts etc. if the user asks anything else that isn't related, just reply with "I am Sorry, CaseWise LawBot is only limited to provide legal and law related help!"`
