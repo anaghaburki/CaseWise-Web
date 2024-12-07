@@ -67,7 +67,7 @@ interface DocumentAnalysis {
   overall_analysis: string | null;
 }
 
-export {};
+export { type CaseFiling };
 
 declare global {
   interface Window {

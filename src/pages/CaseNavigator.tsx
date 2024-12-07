@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useShallow } from "zustand/shallow";
 import useStore from "../store/useStore";
+import { CaseFiling } from "../global";
 
 const CaseNavigator = () => {
   const navigate = useNavigate();
@@ -52,31 +53,53 @@ const CaseNavigator = () => {
     }
   }, [filingExpanded]);
 
-  const handleSaveAndUpdateState = () => {
-    const updatedCase = {
-      ...currentCase,
-      caseFiling: {
-        caseTitle: title,
-        clientDetails: {
-          name: userName,
-          contact: contact,
-          email: email,
-          address: address,
-        },
-        caseType: caseCategory,
-        filingDate: filingDate,
-        jurisdiction: jurisdiction,
-        status: caseStatus,
+  const handleUpdateCaseFiling = async () => {
+    const updatedCaseFiling: CaseFiling = {
+      caseTitle: title.trim(),
+      clientDetails: {
+        name: userName.trim(),
+        contact: contact.trim(),
+        email: email.trim(),
+        address: address.trim() || undefined,
       },
-      navigateStatus,
+      caseType: caseCategory as CaseFiling['caseType'],
+      filingDate: filingDate.trim(),
+      jurisdiction: jurisdiction.trim(),
+      documentsRequired: currentCase?.caseFiling?.documentsRequired || [],
+      status: caseStatus as CaseFiling['status'],
     };
-    updateCaseState(updatedCase);
-    alert("Case details updated successfully!");
-  };
+
+    const caseIndex = useStore.getState().caseList.findIndex(
+      (p) => p.caseFiling.caseTitle === currentCase?.caseFiling?.caseTitle
+    );
+    if (caseIndex !== -1) {
+      useStore.setState((state) => {
+        const updatedCaseList = [...state.caseList];
+        updatedCaseList[caseIndex] = {
+          ...updatedCaseList[caseIndex],
+          caseFiling: updatedCaseFiling,
+        };
+        return {
+          ...state,
+          currentCase: {
+            ...state.currentCase,
+            navigateStatus: state.currentCase?.navigateStatus ?? 0,
+            caseFiling: updatedCaseFiling,
+            evidenceCollection: state.currentCase?.evidenceCollection ?? null,
+            legalResearch: state.currentCase?.legalResearch ?? null,
+            hearingManagement: state.currentCase?.hearingManagement ?? null,
+            caseResolution: state.currentCase?.caseResolution ?? null,
+          },
+          caseList: updatedCaseList,
+        };
+      });
+    }
+    setFilingExpanded(false)
+  }
 
   const handleNextSection = () => {
     setNavigateStatus((prev) => prev + 1);
-    navigate("/Evidence"); 
+    navigate("/Evidence");
   };
 
   return (
@@ -194,7 +217,7 @@ const CaseNavigator = () => {
             </div>
 
             <button
-              onClick={handleSaveAndUpdateState}
+              onClick={handleUpdateCaseFiling}
               style={{
                 marginTop: "20px",
                 padding: "10px 20px",
