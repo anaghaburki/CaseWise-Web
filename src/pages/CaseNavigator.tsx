@@ -20,9 +20,14 @@ const CaseNavigator = () => {
   const [filingDate, setFilingDate] = useState("");
   const [jurisdiction, setJurisdiction] = useState("");
   const [caseStatus, setCaseStatus] = useState("Draft");
+  const [evidenceType, setEvidenceType] = useState<string>("");
+  const [evidenceTitle, setEvidenceTitle] = useState<string>("");
+  const [evidenceDescription, setEvidenceDescription] = useState<string>("");
+  const [evidenceUploadDate, setEvidenceUploadDate] = useState<string>("");
 
   const categoryList = ["Civil", "Criminal", "Corporate", "Family", "Other"];
   const caseStatusList = ["Draft", "Submitted", "Rejected"];
+  const evidenceTypeList = ["Physical","Digital","Witness Statement", "Other"]
 
   const handleAutofill = () => {
     if (currentCase && currentCase.caseFiling) {
