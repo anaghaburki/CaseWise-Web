@@ -30,7 +30,6 @@ const App = () => {
     { name: "Summarizer", path: "/Summarizer" },
     { name: "Predictor", path: "/Predictor" },
     { name: "Navigator", path: "/NewCase" },
-    { name: "Glossary", path: "/Glossary" },
     { name: "Lawbot", path: "/Lawbot" },
     { name: "Account", path: "/Account" },
   ];
@@ -83,7 +82,7 @@ const App = () => {
           </div>
 
           <Routes>
-            <Route path="/" element={<Navigate to="/Summarizer" replace />} />
+            <Route path="/" element={<Navigate to="/Home" replace />} />
             <Route path="/Summarizer" element={<ContractSummarizer />} />
             <Route path="/Lawbot" element={<LawBot />} />
             <Route
