@@ -9,13 +9,6 @@ import {
   getHearingAdvicePrompt,
   getResearchFindingsPrompt,
 } from "../utils/prompts";
-import {
-  CaseData,
-  CaseFiling,
-  CasePrediction,
-  ChatItem,
-  DocumentAnalysis,
-} from "@/global";
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_API_KEY);
 
@@ -35,7 +28,6 @@ type Actions = {
   loadInitialPrompt: () => Promise<void>;
   getCasePrediction: (file?: File | null, inputText?: string) => Promise<void>;
   initNewCase: (title: string, description: string) => Promise<void>;
-  updateCaseState: (updatedFields: Partial<CaseData>) => void;
   getLegalResearch: (caseData: CaseData) => Promise<void>;
   getHearingAdvice: (caseData: CaseData) => Promise<string>
 };
@@ -71,7 +63,11 @@ const useStore = create<State & Actions & Loaders>((set, get) => ({
       set({
         messageList: [
           ...get().messageList,
-          { ai: true, message: response, time: new Date().toLocaleTimeString() },
+          {
+            ai: true,
+            message: response,
+            time: new Date().toLocaleTimeString(),
+          },
         ],
         contextHistory: history,
       });
@@ -97,7 +93,9 @@ const useStore = create<State & Actions & Loaders>((set, get) => ({
 
       reader.onloadend = async () => {
         try {
-          const base64String = arrayBufferToBase64(reader.result as ArrayBuffer);
+          const base64String = arrayBufferToBase64(
+            reader.result as ArrayBuffer
+          );
           const pdf = {
             inlineData: { data: base64String, mimeType: "application/pdf" },
           };
@@ -155,7 +153,9 @@ const useStore = create<State & Actions & Loaders>((set, get) => ({
         const reader = new FileReader();
         reader.onloadend = async () => {
           try {
-            const base64String = arrayBufferToBase64(reader.result as ArrayBuffer);
+            const base64String = arrayBufferToBase64(
+              reader.result as ArrayBuffer
+            );
             const pdf = {
               inlineData: { data: base64String, mimeType: "application/pdf" },
             };
@@ -221,32 +221,56 @@ const useStore = create<State & Actions & Loaders>((set, get) => ({
     }
   },
 
-  updateCaseState: (updatedFields) => {
-    set((state) => ({
-      currentCase: {
-        ...state.currentCase,
-        ...updatedFields,
-      },
-    }));
-  },
-
-  
   getLegalResearch: async (caseData: CaseData) => {
     try {
       set({ responseLoading: true });
-      const history = get().contextHistory;
 
+      const history = get().contextHistory;
       const model = genAI.getGenerativeModel({
         model: "gemini-1.5-flash-002",
-        generationConfig: { responseMimeType: "application/json" },
+        generationConfig: {
+          responseMimeType: "application/json",
+        },
       });
 
-      const chat = model.startChat({ history });
-      const result = await chat.sendMessage(getResearchFindingsPrompt(caseData));
-      const researchFindings = JSON.parse(await result.response.text());
-      
+      const chat = model.startChat({
+        history: history,
+      });
+
+      const result = await chat.sendMessage(
+        getResearchFindingsPrompt(caseData)
+      );
+      const response = result.response;
+      const text = response.text();
+
+      const researchFindings: LegalResearch[] = JSON.parse(
+        text
+      ) as LegalResearch[];
+
+      set((state) => {
+        const { caseList, currentCase } = state;
+        if (!currentCase) return state;
+        const updatedCaseList = caseList.map((caseItem) =>
+          caseItem.caseFiling.caseTitle === currentCase.caseFiling?.caseTitle
+            ? { ...caseItem, legalResearch: researchFindings }
+            : caseItem
+        );
+        return {
+          ...state,
+          currentCase: {
+            ...currentCase,
+            legalResearch: researchFindings,
+          },
+          caseList: updatedCaseList,
+        };
+      });
+
+      set({ contextHistory: history });
+      alert(
+        "ResearchFindings are now available!"
+      );
     } catch (error) {
-      console.error("Error getting legal research:", error);
+      alert("Error Getting research findings" + error?.toString());
     } finally {
       set({ responseLoading: false });
     }
@@ -266,10 +290,10 @@ const useStore = create<State & Actions & Loaders>((set, get) => ({
       const result = await chat.sendMessage(getHearingAdvicePrompt(caseData));
       const advice = await result.response.text();
 
-      return advice; 
+      return advice;
     } catch (error) {
       console.error("Error getting hearing advice:", error);
-      return ""; 
+      return "";
     } finally {
       set({ responseLoading: false });
     }

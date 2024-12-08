@@ -97,9 +97,6 @@ const App = () => {
             <Route path="/CaseNavigator" element={<CaseNavigator />} />
             <Route path="/Hearing" element={<Hearing />} />
             <Route path="/Research" element={<Research />} />
-
-
-          
           </Routes>
         </>
       )}

@@ -11,12 +11,11 @@ const NewCase: React.FC = () => {
   );
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (currentCase) {
-      setTitle(currentCase.caseFiling?.title || '');
-      setDescription(currentCase.caseFiling?.description || '');
+  useEffect(()=>{
+    if(currentCase){
+      navigate("/CaseNavigator")
     }
-  }, [currentCase]);
+  },[])
 
   const handleInitNewCase = async () => {
     if (!(title && description)) {
@@ -36,12 +35,12 @@ const NewCase: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background">
+      <div className="w-full max-w-md p-6 bg-background border-2 border-primary rounded-lg shadow-md">
         <div className="flex items-center gap-2 mb-4">
           <button
             onClick={() => navigate(-1)}
-            className="p-2 rounded-full bg-gray-300 border-none cursor-pointer"
+            className="p-2 rounded-full bg-secondary border-none cursor-pointer"
           >
             &larr;
           </button>
@@ -71,7 +70,7 @@ const NewCase: React.FC = () => {
 
         <button
           onClick={handleInitNewCase}
-          className={`w-full p-4 rounded-lg bg-blue-600 text-white border-none ${
+          className={`w-full p-4 rounded-lg bg-primary text-white border-none ${
             responseLoading ? 'cursor-not-allowed' : 'cursor-pointer'
           }`}
           disabled={responseLoading}

@@ -67,22 +67,6 @@ interface DocumentAnalysis {
   overall_analysis: string | null;
 }
 
-export {};
-
-declare global {
-  interface Window {
-    google: {
-      accounts: {
-        id: {
-          initialize: (config: { client_id: string; callback: (response: any) => void }) => void;
-          renderButton: (container: HTMLElement | null, options: { theme: string; size: string }) => void;
-          prompt: () => void;
-        };
-      };
-    };
-  }
-}
-
 interface CasePrediction {
   predictedOutcome: string | null;
   predictionConfidence: 'Low' | 'Medium' | 'High' | null;
@@ -103,58 +87,55 @@ interface CaseFiling {
     address?: string;
   };
   caseType: "Civil" | "Criminal" | "Corporate" | "Family" | "Other";
-  filingDate: string; 
+  filingDate: string;
   jurisdiction: string;
   documentsRequired: string[];
   status: "Draft" | "Submitted" | "Rejected";
 }
+
 interface EvidenceCollection {
-  evidenceId: string;
   evidenceType: "Physical" | "Digital" | "Witness Statement" | "Other";
+  title: string;
   description: string;
-  uploadedBy: string;
   uploadDate: string;
-  fileUrl?: string;
-  verificationStatus: "Pending" | "Verified" | "Rejected";
 }
+
+interface PrecedentCases {
+  caseTitle: string;
+  caseSummary: string;
+  rulingDate: string;
+  court: string;
+}
+
 interface LegalResearch {
-  researchId: string;
   topic: string;
   notes: string;
-  relatedLaws: string[];
-  precedentCases: {
-    caseTitle: string;
-    caseSummary: string;
-    rulingDate: string;
-    court: string;
-  }[];
-  completionStatus: "In Progress" | "Completed";
+  precedentCases: PrecedentCases
 }
+
 interface HearingManagement {
-  hearingId: string;
   hearingDate: string;
   courtName: string;
   judgeName: string;
   agenda: string;
   outcome?: string;
-  documentsRequired: string[];
   rescheduleDetails?: {
     rescheduledDate: string;
     reason: string;
   };
 }
+
 interface CaseResolution {
-  resolutionId: string;
   resolutionDate: string;
   outcome: "Won" | "Lost" | "Settled" | "Withdrawn";
-  summary: string;
-  judgmentCopyUrl?: string; 
-  followUpActions: string[];
+  notes: string;
 }
+
 interface CaseData {
+  navigateStatus: number?;
   caseFiling: CaseFiling;
   evidenceCollection: EvidenceCollection[] | null;
   legalResearch: LegalResearch[] | null;
   hearingManagement: HearingManagement[] | null;
-  caseResolution?: CaseResolution | null;
+  caseResolution: CaseResolution | null;
 }

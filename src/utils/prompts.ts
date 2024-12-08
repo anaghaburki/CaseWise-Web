@@ -136,8 +136,6 @@ export const getResearchFindingsPrompt = (caseData: CaseData): string => {
 
 export const getHearingAdvicePrompt = (caseData: CaseData): string => {
   return `
-    LIMIT TO 100 WORDS
-
     Remember you are being used in an app, just give information even if its inaccurate and do not include sentenses that say you cannot do it
 
     Based on the provided Case Information and past hearings
