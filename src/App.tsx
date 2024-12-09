@@ -8,7 +8,7 @@ import { useShallow } from "zustand/shallow";
 import GoogleSignIn from "./components/GoogleSignIn";
 import Account from "./components/Account";
 import { initialPrompt } from "./utils/prompts";
-import { onAuthStateChanged, signOut, User } from "firebase/auth"; 
+import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { auth } from "./firebaseConfig";
 import CasePredictor from "./pages/CasePredictor";
 import NewCase from "./components/NewCase";
@@ -23,7 +23,7 @@ const App = () => {
   );
 
   const [activeItem, setActiveItem] = useState("Home");
-  const [user, setUser] = useState<User | null>(null); 
+  const [user, setUser] = useState<User | null>(null);
 
   const screens = [
     { name: "Home", path: "/Summarizer" },
@@ -40,14 +40,14 @@ const App = () => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         console.log("User is signed in:", user);
-        setUser(user); 
+        setUser(user);
       } else {
         console.log("No user is signed in");
-        setUser(null); 
+        setUser(null);
       }
     });
 
-    return () => unsubscribe(); 
+    return () => unsubscribe();
   }, []);
 
   const handleSignIn = (userInfo: User) => {
@@ -56,8 +56,8 @@ const App = () => {
 
   const handleLogout = async () => {
     try {
-      await signOut(auth); 
-      setUser(null); 
+      await signOut(auth);
+      setUser(null);
       console.log("User logged out");
     } catch (error) {
       console.error("Error during logout:", error);
@@ -82,7 +82,8 @@ const App = () => {
           </div>
 
           <Routes>
-            <Route path="/" element={<Navigate to="/Home" replace />} />
+            <Route path="/" element={<NewCase />} />
+            <Route path="/Home" element={<NewCase />} />
             <Route path="/Summarizer" element={<ContractSummarizer />} />
             <Route path="/Lawbot" element={<LawBot />} />
             <Route
