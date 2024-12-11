@@ -16,6 +16,7 @@ import CaseNavigator from "./pages/CaseNavigator";
 import Evidence from "./components/Evidence";
 import Hearing from "./components/Hearing";
 import Research from "./components/Research";
+import Home from "./pages/Home";
 
 const App = () => {
   const [loadInitialPrompt] = useStore(
@@ -26,7 +27,7 @@ const App = () => {
   const [user, setUser] = useState<User | null>(null);
 
   const screens = [
-    { name: "Home", path: "/Summarizer" },
+    { name: "Home", path: "/Home" },
     { name: "Summarizer", path: "/Summarizer" },
     { name: "Predictor", path: "/Predictor" },
     { name: "Navigator", path: "/NewCase" },
@@ -82,8 +83,8 @@ const App = () => {
           </div>
 
           <Routes>
-            <Route path="/" element={<NewCase />} />
-            <Route path="/Home" element={<NewCase />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/Home" element={<Home />} />
             <Route path="/Summarizer" element={<ContractSummarizer />} />
             <Route path="/Lawbot" element={<LawBot />} />
             <Route
