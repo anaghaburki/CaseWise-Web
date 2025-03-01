@@ -11,7 +11,6 @@ const GoogleSignIn: React.FC<GoogleSignInProps> = ({ onSignIn }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        console.log("User already signed in:", user);
         onSignIn(user);
       }
     });
@@ -23,9 +22,7 @@ const GoogleSignIn: React.FC<GoogleSignInProps> = ({ onSignIn }) => {
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      console.log("User signed in:", user);
-      onSignIn(user);
+      onSignIn(result.user);
     } catch (error) {
       console.error("Error signing in with Google:", error);
     }
@@ -38,8 +35,7 @@ const GoogleSignIn: React.FC<GoogleSignInProps> = ({ onSignIn }) => {
           <h1 className="text-3xl font-bold text-primary mb-2">Welcome to CaseWise</h1>
           <p className="text-darkbg">Sign in to access your intelligent legal assistant</p>
         </div>
-
-        {/* Lottie Animation */}
+        
         <div className="mb-8">
           <Player
             autoplay
