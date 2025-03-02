@@ -187,8 +187,10 @@ const Home: React.FC<HomeProps> = ({ onGetStarted }) => {
             <p className="text-lg text-[#EBD9CD]/80">
               Join the future of legal technology with our AI-powered platform
             </p>
-            <button className="bg-[#507680] text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-[#507680]/90 transition-colors inline-flex items-center gap-2">
-              Get Started Now
+            <button 
+              onClick={onGetStarted}
+              className="bg-[#507680] text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-[#507680]/90 transition-colors inline-flex items-center gap-2">
+                Get Started Now
               <ArrowRight className="w-5 h-5" />
             </button>
           </div>
